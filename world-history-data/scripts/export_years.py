@@ -31,6 +31,29 @@ def dumps(o):
     return json.dumps(o, ensure_ascii=False, separators=(",", ":"))
 
 
+def compact(o):
+    """Round floats: counts and money to integers, ratios to 7 decimals."""
+    if isinstance(o, dict):
+        return {k: compact_value(k, v) for k, v in o.items()}
+    if isinstance(o, list):
+        return [compact(v) for v in o]
+    return o
+
+
+def compact_value(k, v):
+    if isinstance(v, (dict, list)):
+        return compact(v)
+    if isinstance(v, float) and v == v:
+        if k in ("population", "gdp_2011usd", "gdp_alt_fariss2022_2011usd", "nmc_tpop"):
+            return int(round(v))
+        if "share" in k:
+            return round(v, 7)
+        return round(v, 3)
+    if isinstance(v, float):
+        return None
+    return v
+
+
 def write_units_topojson(con, path):
     arcs, geoms = topo.load(RAW / "cshapes_2_gw.topojson")
     keep = {r[0] for r in con.execute("SELECT unit_id FROM units")}
@@ -154,6 +177,9 @@ def main():
             "files": {"units_geometry": "geometry/units.topojson", "admin1_geometry": "geometry/admin1_pieces.geojson",
                       "population_grid": f"grids/population_{y}.tif", "map_image": f"../maps/{y}.png"},
         }
+        doc["units"] = compact(doc["units"])
+        doc["sovereigns"] = compact(doc["sovereigns"])
+        doc["world"] = compact(doc["world"])
         (EXPORTS / "years" / f"{y}.json").write_text(dumps(doc))
 
     index = {

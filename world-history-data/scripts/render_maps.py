@@ -11,8 +11,10 @@ everything else is neutral and identified by its label. Dependencies and
 occupied units carry a 45-degree texture in the controller's hue.
 """
 import json
+import logging
 import sqlite3
 import sys
+import textwrap
 from multiprocessing import Pool
 
 import matplotlib
@@ -34,6 +36,7 @@ from shapely.ops import unary_union
 from common import WORK, MAPS, YEARS, HYDE_RES
 from build_database import DB
 
+logging.getLogger("matplotlib.font_manager").setLevel(logging.ERROR)
 FONT = "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc"
 font_manager.fontManager.addfont(FONT)
 plt.rcParams["font.family"] = font_manager.FontProperties(fname=FONT).get_name()
@@ -41,6 +44,7 @@ plt.rcParams["font.family"] = font_manager.FontProperties(fname=FONT).get_name()
 POWERS = {"200": "#2a78d6", "220": "#eb6834", "365": "#1baf7a", "740": "#4a3aa7"}  # UK, France, Russia/USSR, Japan
 NEUTRAL = "#e6e2d8"
 NEUTRAL_DEP = "#efece5"
+LAND = "#f3f1eb"  # land outside any political unit (e.g. Antarctica)
 OCEAN = "#dde7ee"
 INK, INK2, MUTED, HAIR = "#0b0b0b", "#52514e", "#898781", "#c3c2b7"
 RIVER = "#6f9fc4"
@@ -112,6 +116,9 @@ def load_static():
         if p.get("scalerank") is not None and p["scalerank"] <= 6:
             rivers.append((p["scalerank"], line_path(proj(shape(json.loads(g))))))
     st["rivers"] = rivers
+    land = [poly_path(proj(shape(json.loads(g)))) for (g,) in
+            con.execute("SELECT geometry FROM physical_features WHERE layer='land'")]
+    st["land"] = Path.make_compound_path(*[p for p in land if p is not None])
     lakes = []
     for props, g in con.execute("SELECT properties, geometry FROM physical_features WHERE layer='lakes'"):
         p = json.loads(props)
@@ -156,8 +163,10 @@ def render(year):
     sov = {b: con.execute("SELECT sovereign_gwcode, sovereign_name_zh, sovereign_name_en, pop_share_world, gdp_share_world "
                           "FROM sovereign_year WHERE year=? AND basis=? ORDER BY population DESC", (year, b)).fetchall()
            for b in ("de_facto",)}
-    partial = con.execute("SELECT DISTINCT e.event_id, e.unit_name, e.controller_name_zh, e.control_type FROM control_events e "
-                          "WHERE e.scope='partial' AND e.start_date<=? AND e.end_date>=?", (yr[6], yr[6])).fetchall()
+    partial = con.execute("SELECT DISTINCT e.event_id, COALESCE(u.name_zh, e.unit_name), e.controller_name_zh, e.control_type "
+                          "FROM control_events e LEFT JOIN unit_year u ON u.year=? AND u.cshapes_name=e.unit_name "
+                          "AND u.gwcode=e.unit_gwcode WHERE e.scope='partial' AND e.start_date<=? AND e.end_date>=?",
+                          (year, yr[6], yr[6])).fetchall()
     con.close()
 
     fig = plt.figure(figsize=(W_PX / DPI, H_PX / DPI), dpi=DPI, facecolor=SURFACE)
@@ -168,6 +177,7 @@ def render(year):
     ax.axis("off")
     frame = PathPatch(st["frame"], facecolor=OCEAN, edgecolor=HAIR, lw=0.6, zorder=0)
     ax.add_patch(frame)
+    ax.add_patch(PathPatch(st["land"], facecolor=LAND, edgecolor="none", zorder=0.5))
 
     # units
     by_ctrl = {}
@@ -184,7 +194,8 @@ def render(year):
             ax.add_patch(PathPatch(path, facecolor="none", edgecolor=tint(hatch_c, 0.55), hatch="////", lw=0, zorder=1.1))
         by_ctrl.setdefault(str(ctrl), []).append(g)
 
-    ax.imshow(st["shade"], extent=(-XMAX, XMAX, -YMAX, YMAX), zorder=2, interpolation="bilinear")
+    shade = ax.imshow(st["shade"], extent=(-XMAX, XMAX, -YMAX, YMAX), zorder=2, interpolation="bilinear")
+    shade.set_clip_path(frame)
 
     # hydrography
     lake_paths = [p for vf, vt, p in st["lakes"]
@@ -251,23 +262,23 @@ def render(year):
     lx.set_ylim(0, 1)
     items = [("200", "英国"), ("220", "法国"), ("365", "俄国/苏联"), ("740", "日本"), (None, "其他国家")]
     for k, (code, lab) in enumerate(items):
-        yy = 0.9 - k * 0.15
+        yy = 0.93 - k * 0.12
         base = POWERS.get(code) if code else None
-        lx.add_patch(plt.Rectangle((0.0, yy - 0.05), 0.07, 0.1, facecolor=tint(base, 0.48) if base else NEUTRAL,
+        lx.add_patch(plt.Rectangle((0.0, yy - 0.04), 0.07, 0.08, facecolor=tint(base, 0.48) if base else NEUTRAL,
                                    edgecolor=INK2, lw=0.4))
-        lx.add_patch(plt.Rectangle((0.09, yy - 0.05), 0.07, 0.1, facecolor=tint(base, 0.30) if base else NEUTRAL_DEP,
+        lx.add_patch(plt.Rectangle((0.09, yy - 0.04), 0.07, 0.08, facecolor=tint(base, 0.30) if base else NEUTRAL_DEP,
                                    edgecolor=INK2, lw=0.4))
-        lx.add_patch(plt.Rectangle((0.09, yy - 0.05), 0.07, 0.1, facecolor="none", hatch="////",
+        lx.add_patch(plt.Rectangle((0.09, yy - 0.04), 0.07, 0.08, facecolor="none", hatch="////",
                                    edgecolor=tint(base or MUTED, 0.55), lw=0))
         lx.text(0.18, yy, lab, fontsize=7.5, color=INK, va="center")
-    lx.text(0.0, 0.12, "左：本土/独立　右（斜线）：殖民地·保护国·委任统治·占领区\n"
+    lx.text(0.0, 0.0, "左：本土/独立　右（斜线）：殖民地·保护国·委任统治·占领区\n"
                        "粗线：同一实际控制者的外界　细线：历史政治单元　浅细线：现代一级行政区（参考）\n"
                        "圆点面积 ∝ 人口（各年同一比例尺），数字为占世界人口比例", fontsize=6.2, color=INK2, va="bottom", linespacing=1.4)
 
     # share bars by de facto controller: population and GDP (two charts, one axis each)
-    top = sov["de_facto"][:8]
     for j, (col, title) in enumerate(((3, "占世界人口比例（按实际控制者）"), (4, "占世界GDP比例（按实际控制者）"))):
-        bx = fig.add_axes([0.33 + j * 0.25, 0.03, 0.2, 0.13])
+        top = sorted(sov["de_facto"], key=lambda t: -(t[col] or 0))[:8]
+        bx = fig.add_axes([0.35 + j * 0.25, 0.03, 0.19, 0.13])
         vals = [t[col] * 100 for t in top]
         names = [(t[1] or t[2] or "?")[:9] for t in top]
         cols = [POWERS.get(str(t[0]), MUTED) for t in top]
@@ -285,9 +296,12 @@ def render(year):
         bx.set_axisbelow(True)
 
     # partial control notes + sources
-    note = "；".join(f"{p[1]}：{p[2]}（局部）" for p in partial[:6])
-    if note:
-        fig.text(0.83, 0.17, "局部控制：" + note, fontsize=5.6, color=INK2, va="top", wrap=True)
+    if partial:
+        lines = ["局部控制（未画边界）："] + [f"· {p[1]}：{p[2]}" for p in partial[:7]]
+        if len(partial) > 7:
+            lines.append(f"· 另 {len(partial) - 7} 项，见 control_events")
+        fig.text(0.83, 0.175, "\n".join(textwrap.shorten(l, 30, placeholder="…") for l in lines),
+                 fontsize=5.8, color=INK2, va="top", linespacing=1.35)
     fig.text(0.83, 0.075,
              "边界 CShapes 2.0；人口 UN WPP / Gapminder / COW NMC，\n空间分布 GHS-POP；GDP Maddison 2020 / Gapminder；\n"
              "地形 Terrarium；水系 Natural Earth。人口分布模式：" + yr[5],

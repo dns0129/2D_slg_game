@@ -1,0 +1,301 @@
+{
+ "database": "world_history_1900_2000.sqlite",
+ "checks": {
+  "every_year_present": {
+   "ok": true,
+   "detail": "101 years 1900-2000"
+  },
+  "units_sum_to_world_population": {
+   "ok": true,
+   "detail": "max relative gap 4.79e-09"
+  },
+  "units_sum_to_world_gdp": {
+   "ok": true,
+   "detail": "max relative gap 2.20e-09"
+  },
+  "admin1_pieces_sum_to_unit": {
+   "ok": true,
+   "detail": "max relative gap 3.58e-03 (units > 100k people)"
+  },
+  "units_without_admin1_pieces": {
+   "ok": true,
+   "detail": "0 unit-years, 0 people"
+  },
+  "de_jure_shares_sum_to_one": {
+   "ok": true,
+   "detail": "max deviation 4.79e-09"
+  },
+  "de_facto_shares_sum_to_one": {
+   "ok": true,
+   "detail": "max deviation 4.79e-09"
+  },
+  "no_negative_values": {
+   "ok": true,
+   "detail": "0 negative rows"
+  },
+  "all_units_named_en_zh": {
+   "ok": true,
+   "detail": "0 unit-years without a name"
+  },
+  "all_units_have_geometry": {
+   "ok": true,
+   "detail": "0 units without geometry"
+  },
+  "population_grid_matches_world": {
+   "ok": true,
+   "detail": "max relative gap 1.73e-07"
+  },
+  "control_events": {
+   "ok": true,
+   "detail": "69 events (35 whole-unit, 34 partial)"
+  },
+  "export_years_same_schema": {
+   "ok": true,
+   "detail": "101 year files"
+  },
+  "one_map_per_year": {
+   "ok": true,
+   "detail": "101 map images"
+  }
+ },
+ "summary": {
+  "1900": {
+   "world_population": 1556428964,
+   "world_gdp_2011usd": 3314666757428,
+   "units": 151,
+   "independent": 52,
+   "dependent": 99,
+   "top_de_facto_by_population": [
+    {
+     "name": "大清",
+     "pop_share_pct": 25.4,
+     "gdp_share_pct": 11.6
+    },
+    {
+     "name": "英国",
+     "pop_share_pct": 25.3,
+     "gdp_share_pct": 20.4
+    },
+    {
+     "name": "俄罗斯帝国",
+     "pop_share_pct": 8.7,
+     "gdp_share_pct": 9.8
+    },
+    {
+     "name": "法国",
+     "pop_share_pct": 5.5,
+     "gdp_share_pct": 6.8
+    },
+    {
+     "name": "美国",
+     "pop_share_pct": 5.4,
+     "gdp_share_pct": 18.7
+    }
+   ]
+  },
+  "1913": {
+   "world_population": 1765701048,
+   "world_gdp_2011usd": 4526424045042,
+   "units": 151,
+   "independent": 56,
+   "dependent": 95,
+   "top_de_facto_by_population": [
+    {
+     "name": "中华民国",
+     "pop_share_pct": 24.3,
+     "gdp_share_pct": 9.4
+    },
+    {
+     "name": "英国",
+     "pop_share_pct": 23.6,
+     "gdp_share_pct": 17.1
+    },
+    {
+     "name": "俄罗斯帝国",
+     "pop_share_pct": 9.8,
+     "gdp_share_pct": 10.8
+    },
+    {
+     "name": "美国",
+     "pop_share_pct": 6.0,
+     "gdp_share_pct": 21.9
+    },
+    {
+     "name": "法国",
+     "pop_share_pct": 5.5,
+     "gdp_share_pct": 6.3
+    }
+   ]
+  },
+  "1938": {
+   "world_population": 2202789321,
+   "world_gdp_2011usd": 6727556409260,
+   "units": 173,
+   "independent": 69,
+   "dependent": 104,
+   "top_de_facto_by_population": [
+    {
+     "name": "中华民国",
+     "pop_share_pct": 22.9,
+     "gdp_share_pct": 7.6
+    },
+    {
+     "name": "英国",
+     "pop_share_pct": 22.7,
+     "gdp_share_pct": 14.6
+    },
+    {
+     "name": "苏联",
+     "pop_share_pct": 7.6,
+     "gdp_share_pct": 9.9
+    },
+    {
+     "name": "美国",
+     "pop_share_pct": 6.6,
+     "gdp_share_pct": 20.8
+    },
+    {
+     "name": "法国",
+     "pop_share_pct": 5.6,
+     "gdp_share_pct": 6.1
+    }
+   ]
+  },
+  "1942": {
+   "world_population": 2280010030,
+   "world_gdp_2011usd": 7547732231028,
+   "units": 169,
+   "independent": 66,
+   "dependent": 103,
+   "top_de_facto_by_population": [
+    {
+     "name": "中华民国",
+     "pop_share_pct": 22.6,
+     "gdp_share_pct": 6.4
+    },
+    {
+     "name": "英国",
+     "pop_share_pct": 22.2,
+     "gdp_share_pct": 14.6
+    },
+    {
+     "name": "大日本帝国",
+     "pop_share_pct": 9.4,
+     "gdp_share_pct": 8.2
+    },
+    {
+     "name": "苏联",
+     "pop_share_pct": 8.0,
+     "gdp_share_pct": 8.7
+    },
+    {
+     "name": "纳粹德国（德意志国）",
+     "pop_share_pct": 7.2,
+     "gdp_share_pct": 13.1
+    }
+   ]
+  },
+  "1950": {
+   "world_population": 2492907852,
+   "world_gdp_2011usd": 8453028830320,
+   "units": 172,
+   "independent": 82,
+   "dependent": 90,
+   "top_de_facto_by_population": [
+    {
+     "name": "中华人民共和国",
+     "pop_share_pct": 21.9,
+     "gdp_share_pct": 5.2
+    },
+    {
+     "name": "印度",
+     "pop_share_pct": 13.9,
+     "gdp_share_pct": 4.0
+    },
+    {
+     "name": "美国",
+     "pop_share_pct": 9.7,
+     "gdp_share_pct": 31.0
+    },
+    {
+     "name": "苏联",
+     "pop_share_pct": 7.3,
+     "gdp_share_pct": 9.6
+    },
+    {
+     "name": "英国",
+     "pop_share_pct": 6.0,
+     "gdp_share_pct": 8.2
+    }
+   ]
+  },
+  "1975": {
+   "world_population": 4069954882,
+   "world_gdp_2011usd": 26647502293767,
+   "units": 161,
+   "independent": 142,
+   "dependent": 19,
+   "top_de_facto_by_population": [
+    {
+     "name": "中华人民共和国",
+     "pop_share_pct": 22.6,
+     "gdp_share_pct": 5.7
+    },
+    {
+     "name": "印度",
+     "pop_share_pct": 15.0,
+     "gdp_share_pct": 3.3
+    },
+    {
+     "name": "苏联",
+     "pop_share_pct": 6.2,
+     "gdp_share_pct": 9.5
+    },
+    {
+     "name": "美国",
+     "pop_share_pct": 5.5,
+     "gdp_share_pct": 21.5
+    },
+    {
+     "name": "印度尼西亚",
+     "pop_share_pct": 3.2,
+     "gdp_share_pct": 1.2
+    }
+   ]
+  },
+  "2000": {
+   "world_population": 6170287248,
+   "world_gdp_2011usd": 60442984263031,
+   "units": 177,
+   "independent": 170,
+   "dependent": 7,
+   "top_de_facto_by_population": [
+    {
+     "name": "中华人民共和国",
+     "pop_share_pct": 20.7,
+     "gdp_share_pct": 10.3
+    },
+    {
+     "name": "印度",
+     "pop_share_pct": 17.1,
+     "gdp_share_pct": 4.8
+    },
+    {
+     "name": "美国",
+     "pop_share_pct": 4.6,
+     "gdp_share_pct": 21.6
+    },
+    {
+     "name": "印度尼西亚",
+     "pop_share_pct": 3.5,
+     "gdp_share_pct": 1.9
+    },
+    {
+     "name": "巴西",
+     "pop_share_pct": 2.8,
+     "gdp_share_pct": 2.8
+    }
+   ]
+  }
+ }
+}

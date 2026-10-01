@@ -21,7 +21,8 @@ from common import RAW, WORK, ROOT, DB_DIR, YEARS, GRID_RES, HYDE_RES, SNAPSHOT_
 DB = DB_DIR / f"world_history_{YEARS[0]}_{YEARS[-1]}.sqlite"
 UNIT_TOL = 0.01      # degrees, shared-arc simplification for unit borders
 PIECE_TOL = 0.01
-DB_GRID_RES = 0.5    # population/GDP grids stored in the DB
+DB_GRID_RES = {"population": 0.5, "gdp": 1.0}  # grid resolution stored in the DB
+DB_ELEV_RES = 1.0 / 6.0  # 10'; the 5' elevation GeoTIFF is in exports/physical
 
 
 SOURCES = [
@@ -94,7 +95,7 @@ CREATE TABLE admin1_pieces (
   label_lon REAL, label_lat REAL, unit_ids TEXT, geometry TEXT);
 CREATE TABLE admin1_year (
   year INTEGER, unit_id INTEGER, piece_id INTEGER, population REAL, gdp_2011usd REAL,
-  pop_share_unit REAL, pop_share_world REAL, PRIMARY KEY (year, unit_id, piece_id));
+  pop_share_unit REAL, pop_share_world REAL, PRIMARY KEY (year, unit_id, piece_id)) WITHOUT ROWID;
 CREATE TABLE country_series (
   code TEXT, name TEXT, subregion TEXT, year INTEGER, population REAL, pop_source TEXT,
   gdppc_2011usd REAL, gdppc_source TEXT, gdppc_gapminder_2017usd REAL, gdp_2011usd REAL, PRIMARY KEY (code, year));
@@ -113,8 +114,6 @@ CREATE TABLE physical_features (
   layer TEXT, feature_id INTEGER, name TEXT, name_zh TEXT, featurecla TEXT, scalerank REAL,
   valid_from INTEGER, valid_to INTEGER, properties TEXT, geometry TEXT, PRIMARY KEY (layer, feature_id));
 CREATE INDEX unit_year_unit ON unit_year(unit_id);
-CREATE INDEX admin1_year_piece ON admin1_year(piece_id);
-CREATE INDEX admin1_year_unit ON admin1_year(year, unit_id);
 CREATE INDEX sovereign_year_year ON sovereign_year(year, basis);
 """
 
@@ -294,9 +293,9 @@ def main():
     namer.t.to_sql("unit_names", con, if_exists="append", index=False)
 
     # ---- grids (aggregated to DB_GRID_RES)
-    f = int(round(DB_GRID_RES / GRID_RES))
     for y in YEARS:
         for var, unit in (("population", "persons per cell"), ("gdp", "2011 international $ per cell")):
+            f = int(round(DB_GRID_RES[var] / GRID_RES))
             a = np.load(WORK / "grids" / f"{'pop' if var == 'population' else 'gdp'}_{y}.npy")
             h, w = a.shape
             a = a.reshape(h // f, f, w // f, f).sum(axis=(1, 3))
@@ -308,13 +307,16 @@ def main():
                 unit = "thousand 2011 international $ per cell"
                 dtype = "uint32"
             con.execute("INSERT INTO grids VALUES (?,?,?,?,?,?,?,?,?,?,?)",
-                        (y, var, unit, DB_GRID_RES, -180.0, 90.0, a.shape[1], a.shape[0], dtype, "zlib", pack(a)))
+                        (y, var, unit, DB_GRID_RES[var], -180.0, 90.0, a.shape[1], a.shape[0], dtype, "zlib", pack(a)))
 
     # ---- rasters
     z = np.load(WORK / "elevation_5m.npy")
+    k = int(round(DB_ELEV_RES / HYDE_RES))
+    ze = z.reshape(z.shape[0] // k, k, z.shape[1] // k, k).mean(axis=(1, 3))
     con.execute("INSERT INTO rasters VALUES (?,?,?,?,?,?,?,?,?,?,?)",
-                ("elevation", "Elevation / bathymetry (Terrarium z5, area-averaged)", "metres", HYDE_RES, -180.0, 90.0,
-                 z.shape[1], z.shape[0], "int16", "zlib", pack(np.round(z).astype(np.int16))))
+                ("elevation", "Elevation / bathymetry (Terrarium z5, area-averaged; 5' GeoTIFF in exports/physical)",
+                 "metres", DB_ELEV_RES, -180.0, 90.0, ze.shape[1], ze.shape[0], "int16", "zlib",
+                 pack(np.round(ze).astype(np.int16))))
     hs = (WORK / "physical" / "hillshade_5m.png").read_bytes()
     con.execute("INSERT INTO rasters VALUES (?,?,?,?,?,?,?,?,?,?,?)",
                 ("hillshade", "Land hillshade for multiply blending (255 = lit/flat, darker = shadow)", "0-255",
