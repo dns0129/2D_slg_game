@@ -59,6 +59,10 @@ python3 -m http.server 8765 --bind 127.0.0.1
 
 **中国省内当前仍有战略分区，不是已核实的 1941 县界或督察区界。部分古代郡域和亚洲地区细界仍需历史精校。** 详细图源、许可、已核对沿革和未完成项目见 [maps/SOURCES.md](maps/SOURCES.md)。
 
+## 世界历史逐年数据库
+
+`world-history-data/` 是独立的数据收集项目，与游戏运行无关。内容为 1900–2000 年逐年的全球实际控制政治地图、行政区划、人口分布、GDP、地形与河流，存成 SQLite 数据库和便于前端导入的逐年 JSON / TopoJSON，每年另附一张地图。说明见 [world-history-data/README.md](world-history-data/README.md)。
+
 ## 验证与扩展
 
 `scripts/build_atlas.py` 构建矢量地图、层级、真实邻接和分辨率不同的山体图层。新剧本提供独立年代区划数据与 `meta`，由游戏自动注册。

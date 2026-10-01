@@ -17,3 +17,8 @@ previews/**/source/terrain/
 # Keep small verification reports; regenerate rendered preview assets locally.
 previews/**/output/*
 !previews/**/output/*.json
+
+# World history data pipeline: raw downloads and intermediates are recreated
+# by world-history-data/scripts/fetch_sources.py and the build scripts.
+world-history-data/raw/
+world-history-data/work/
