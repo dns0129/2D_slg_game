@@ -4,6 +4,8 @@
 
 ## 启动
 
+在线游玩：[山河棋局](https://dns0129.github.io/2D_slg_game/)。GitHub Pages 从 `main` 分支根目录发布，后续提交会自动更新站点。
+
 双击 `index.html`，或在本目录运行：
 
 ```sh
