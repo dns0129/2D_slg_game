@@ -1,0 +1,19 @@
+# Local system and development files
+.DS_Store
+Thumbs.db
+__pycache__/
+*.py[cod]
+node_modules/
+.venv/
+venv/
+.env
+.env.*
+*.pem
+*.key
+
+# Downloaded elevation tiles can be recreated with the terrain fetch scripts.
+previews/**/source/terrain/
+
+# Keep small verification reports; regenerate rendered preview assets locally.
+previews/**/output/*
+!previews/**/output/*.json

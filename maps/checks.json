@@ -1,0 +1,250 @@
+{
+  "projection": "Lambert Azimuthal Equal Area, centre 105°E 30°N",
+  "units_km": 10,
+  "scenarios": {
+    "three": {
+      "units": 120,
+      "macro_regions": 15,
+      "valid": true,
+      "symmetric_adjacency": true,
+      "sea_routes": [],
+      "joint_or_strategy_units": 9
+    },
+    "asia": {
+      "units": 527,
+      "macro_regions": 83,
+      "valid": true,
+      "symmetric_adjacency": true,
+      "sea_routes": [
+        [
+          "japan-fukuoka",
+          "korea-keishonan"
+        ],
+        [
+          "cn-shanghai-city",
+          "japan-osaka"
+        ],
+        [
+          "cn-guangdong-1",
+          "region-hongkong"
+        ],
+        [
+          "region-hongkong",
+          "philippines-manila"
+        ],
+        [
+          "philippines-manila",
+          "dei-29"
+        ],
+        [
+          "malaya-singapore",
+          "dei-29"
+        ],
+        [
+          "malaya-singapore",
+          "philippines-manila"
+        ],
+        [
+          "japan-tokyo",
+          "japan-hokkaido"
+        ],
+        [
+          "japan-fukuoka",
+          "tw-235"
+        ],
+        [
+          "tw-235",
+          "cn-shanghai-city"
+        ],
+        [
+          "dei-13",
+          "dei-26"
+        ],
+        [
+          "dei-24",
+          "dei-71"
+        ],
+        [
+          "dei-71",
+          "dei-72"
+        ],
+        [
+          "dei-28",
+          "dei-57"
+        ],
+        [
+          "dei-49",
+          "dei-54"
+        ],
+        [
+          "dei-53",
+          "dei-65"
+        ],
+        [
+          "dei-72",
+          "dei-75"
+        ],
+        [
+          "dei-75",
+          "dei-74"
+        ],
+        [
+          "indo-80",
+          "indo-92"
+        ],
+        [
+          "indo-17",
+          "region-guangzhouwan"
+        ],
+        [
+          "japan-hiroshima",
+          "japan-ehime"
+        ],
+        [
+          "japan-hokkaido",
+          "region-chishima"
+        ],
+        [
+          "tw-238",
+          "tw-242"
+        ],
+        [
+          "cn-shandong-2",
+          "region-kwantung"
+        ],
+        [
+          "japan-hokkaido",
+          "region-karafuto"
+        ],
+        [
+          "region-india",
+          "region-ceylon"
+        ],
+        [
+          "burma-86",
+          "region-andaman"
+        ],
+        [
+          "burma-91",
+          "malaya-perlis"
+        ],
+        [
+          "malaya-johor",
+          "malaya-singapore"
+        ],
+        [
+          "malaya-johor",
+          "region-sarawak"
+        ],
+        [
+          "region-northborneo",
+          "region-hongkong"
+        ],
+        [
+          "philippines-batangas",
+          "philippines-mindoro"
+        ],
+        [
+          "philippines-tayabas",
+          "philippines-marinduque"
+        ],
+        [
+          "philippines-sorsogon",
+          "philippines-samar"
+        ],
+        [
+          "philippines-leyte",
+          "philippines-cebu"
+        ],
+        [
+          "philippines-cebu",
+          "philippines-negrosoriental"
+        ],
+        [
+          "philippines-negrosoccidental",
+          "philippines-iloilo"
+        ],
+        [
+          "philippines-capiz",
+          "philippines-romblon"
+        ],
+        [
+          "philippines-samar",
+          "philippines-masbate"
+        ],
+        [
+          "philippines-cebu",
+          "philippines-bohol"
+        ],
+        [
+          "philippines-leyte",
+          "philippines-surigao"
+        ],
+        [
+          "philippines-zamboanga",
+          "philippines-sulu"
+        ],
+        [
+          "philippines-mindoro",
+          "philippines-palawan"
+        ],
+        [
+          "philippines-cagayan",
+          "philippines-batanes"
+        ]
+      ],
+      "joint_or_strategy_units": 125
+    }
+  },
+  "limitations": [
+    "古代界线为配准复原，存在联合郡域；非逐县精校的 222 年定本",
+    "中国 1941 省内战略分区不是历史县界",
+    "部分亚洲地区使用 1931 或 1945 底本，年份在 inspector 中公开",
+    "自然海岸使用现代公开物理地理底图；古代河道未全量复原",
+    "初始势力控制是可玩的战区抽象，不是精确占领线"
+  ],
+  "relief": [
+    {
+      "url": "./maps/relief-asia.png",
+      "bounds": [
+        149.314,
+        90.357,
+        1657.486,
+        1074.493
+      ],
+      "minZoom": 1,
+      "demZoom": 5,
+      "width": 3200,
+      "height": 2074,
+      "coverage": 0.803
+    },
+    {
+      "url": "./maps/relief-east-asia.png",
+      "bounds": [
+        947.511,
+        454.718,
+        449.814,
+        355.925
+      ],
+      "minZoom": 2,
+      "demZoom": 8,
+      "width": 4000,
+      "height": 3165,
+      "coverage": 0.789
+    },
+    {
+      "url": "./maps/relief-zhejiang.png",
+      "bounds": [
+        1111.443,
+        647.471,
+        83.303,
+        90.774
+      ],
+      "minZoom": 5,
+      "demZoom": 10,
+      "width": 2600,
+      "height": 2833,
+      "coverage": 0.863
+    }
+  ]
+}

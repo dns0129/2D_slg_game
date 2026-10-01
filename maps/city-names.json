@@ -1,0 +1,752 @@
+[
+  {
+    "id": "cn-shanghai-city",
+    "name": "上海",
+    "parent": "上海市",
+    "inside_region": true
+  },
+  {
+    "id": "cn-xinjiang-1",
+    "name": "伊宁",
+    "parent": "新疆省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-xinjiang-2",
+    "name": "哈密",
+    "parent": "新疆省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-xinjiang-3",
+    "name": "喀什",
+    "parent": "新疆省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-xinjiang-4",
+    "name": "承化",
+    "parent": "新疆省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-xinjiang-5",
+    "name": "迪化",
+    "parent": "新疆省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-xinjiang-6",
+    "name": "和田",
+    "parent": "新疆省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-tibet-1",
+    "name": "日喀则",
+    "parent": "西藏地方",
+    "inside_region": true
+  },
+  {
+    "id": "cn-tibet-2",
+    "name": "噶大克",
+    "parent": "西藏地方",
+    "inside_region": true
+  },
+  {
+    "id": "cn-tibet-3",
+    "name": "萨嘎",
+    "parent": "西藏地方",
+    "inside_region": true
+  },
+  {
+    "id": "cn-tibet-4",
+    "name": "拉萨",
+    "parent": "西藏地方",
+    "inside_region": true
+  },
+  {
+    "id": "cn-tibet-5",
+    "name": "黑河",
+    "parent": "西藏地方",
+    "inside_region": true
+  },
+  {
+    "id": "cn-tibet-6",
+    "name": "改则",
+    "parent": "西藏地方",
+    "inside_region": true
+  },
+  {
+    "id": "cn-xikang-1",
+    "name": "昌都",
+    "parent": "西康省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-xikang-2",
+    "name": "丁青",
+    "parent": "西康省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-xikang-3",
+    "name": "康定",
+    "parent": "西康省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-xikang-4",
+    "name": "贡布江达",
+    "parent": "西康省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-xikang-5",
+    "name": "甘孜",
+    "parent": "西康省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-xikang-6",
+    "name": "巴塘",
+    "parent": "西康省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-yunnan-1",
+    "name": "思茅",
+    "parent": "云南省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-yunnan-2",
+    "name": "昭通",
+    "parent": "云南省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-yunnan-3",
+    "name": "昆明",
+    "parent": "云南省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-yunnan-4",
+    "name": "大理",
+    "parent": "云南省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-gansu-1",
+    "name": "兰州",
+    "parent": "甘肃省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-gansu-2",
+    "name": "敦煌",
+    "parent": "甘肃省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-gansu-3",
+    "name": "张掖",
+    "parent": "甘肃省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-gansu-4",
+    "name": "天水",
+    "parent": "甘肃省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-ningxia-1",
+    "name": "宁夏",
+    "parent": "宁夏省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-ningxia-2",
+    "name": "达来库布",
+    "parent": "宁夏省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-ningxia-3",
+    "name": "定远营",
+    "parent": "宁夏省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-ningxia-4",
+    "name": "阿拉腾敖包",
+    "parent": "宁夏省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-qinghai-1",
+    "name": "拉加",
+    "parent": "青海省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-qinghai-2",
+    "name": "杂多",
+    "parent": "青海省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-qinghai-3",
+    "name": "鱼卡",
+    "parent": "青海省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-qinghai-4",
+    "name": "玉树",
+    "parent": "青海省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-qinghai-5",
+    "name": "都兰",
+    "parent": "青海省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-qinghai-6",
+    "name": "西宁",
+    "parent": "青海省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-shaanxi-1",
+    "name": "西安",
+    "parent": "陕西省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-shaanxi-2",
+    "name": "榆林",
+    "parent": "陕西省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-shaanxi-3",
+    "name": "汉中",
+    "parent": "陕西省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-shaanxi-4",
+    "name": "韩城",
+    "parent": "陕西省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-sichuan-1",
+    "name": "宜宾",
+    "parent": "四川省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-sichuan-2",
+    "name": "西昌",
+    "parent": "四川省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-sichuan-3",
+    "name": "重庆",
+    "parent": "四川省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-sichuan-4",
+    "name": "成都",
+    "parent": "四川省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-guizhou-1",
+    "name": "都匀",
+    "parent": "贵州省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-guizhou-2",
+    "name": "安顺",
+    "parent": "贵州省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-guizhou-3",
+    "name": "铜仁",
+    "parent": "贵州省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-guizhou-4",
+    "name": "贵阳",
+    "parent": "贵州省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-guangxi-1",
+    "name": "柳州",
+    "parent": "广西省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-guangxi-2",
+    "name": "百色",
+    "parent": "广西省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-guangxi-3",
+    "name": "桂林",
+    "parent": "广西省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-guangxi-4",
+    "name": "南宁",
+    "parent": "广西省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-hubei-1",
+    "name": "荆州",
+    "parent": "湖北省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-hubei-2",
+    "name": "宜昌",
+    "parent": "湖北省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-hubei-3",
+    "name": "襄阳",
+    "parent": "湖北省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-hubei-4",
+    "name": "武昌",
+    "parent": "湖北省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-henan-1",
+    "name": "商丘",
+    "parent": "河南省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-henan-2",
+    "name": "信阳",
+    "parent": "河南省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-henan-3",
+    "name": "洛阳",
+    "parent": "河南省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-henan-4",
+    "name": "郑州",
+    "parent": "河南省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-anhui-1",
+    "name": "合肥",
+    "parent": "安徽省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-anhui-2",
+    "name": "安庆",
+    "parent": "安徽省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-anhui-3",
+    "name": "蚌埠",
+    "parent": "安徽省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-anhui-4",
+    "name": "芜湖",
+    "parent": "安徽省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-jiangxi-1",
+    "name": "吉安",
+    "parent": "江西省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-jiangxi-2",
+    "name": "赣县",
+    "parent": "江西省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-jiangxi-3",
+    "name": "上饶",
+    "parent": "江西省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-jiangxi-4",
+    "name": "南昌",
+    "parent": "江西省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-hunan-1",
+    "name": "衡阳",
+    "parent": "湖南省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-hunan-2",
+    "name": "郴县",
+    "parent": "湖南省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-hunan-3",
+    "name": "芷江",
+    "parent": "湖南省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-hunan-4",
+    "name": "长沙",
+    "parent": "湖南省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-shanxi-1",
+    "name": "长治",
+    "parent": "山西省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-shanxi-2",
+    "name": "大同",
+    "parent": "山西省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-shanxi-3",
+    "name": "临汾",
+    "parent": "山西省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-shanxi-4",
+    "name": "太原",
+    "parent": "山西省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-heilongjiang-1",
+    "name": "齐齐哈尔",
+    "parent": "黑龙江省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-heilongjiang-2",
+    "name": "海拉尔",
+    "parent": "黑龙江省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-heilongjiang-3",
+    "name": "根河",
+    "parent": "黑龙江省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-heilongjiang-4",
+    "name": "铁骊",
+    "parent": "黑龙江省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-jilin-1",
+    "name": "牡丹江",
+    "parent": "吉林省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-jilin-2",
+    "name": "佳木斯",
+    "parent": "吉林省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-jilin-3",
+    "name": "哈尔滨",
+    "parent": "吉林省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-jilin-4",
+    "name": "延吉",
+    "parent": "吉林省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-liaoning-1",
+    "name": "奉天",
+    "parent": "辽宁省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-liaoning-2",
+    "name": "洮南",
+    "parent": "辽宁省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-liaoning-3",
+    "name": "锦州",
+    "parent": "辽宁省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-liaoning-4",
+    "name": "通化",
+    "parent": "辽宁省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-rehe-1",
+    "name": "赤峰",
+    "parent": "热河省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-rehe-2",
+    "name": "开鲁",
+    "parent": "热河省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-rehe-3",
+    "name": "朝阳",
+    "parent": "热河省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-rehe-4",
+    "name": "承德",
+    "parent": "热河省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-chahar-1",
+    "name": "多伦",
+    "parent": "察哈尔省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-chahar-2",
+    "name": "贝子庙",
+    "parent": "察哈尔省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-chahar-3",
+    "name": "赛罕塔拉",
+    "parent": "察哈尔省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-chahar-4",
+    "name": "张家口",
+    "parent": "察哈尔省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-suiyuan-1",
+    "name": "归绥",
+    "parent": "绥远省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-suiyuan-2",
+    "name": "五原",
+    "parent": "绥远省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-suiyuan-3",
+    "name": "盐池",
+    "parent": "绥远省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-suiyuan-4",
+    "name": "集宁",
+    "parent": "绥远省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-jiangsu-1",
+    "name": "南京",
+    "parent": "江苏省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-jiangsu-2",
+    "name": "徐州",
+    "parent": "江苏省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-jiangsu-3",
+    "name": "苏州",
+    "parent": "江苏省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-jiangsu-4",
+    "name": "盐城",
+    "parent": "江苏省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-hebei-1",
+    "name": "保定",
+    "parent": "河北省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-hebei-2",
+    "name": "唐山",
+    "parent": "河北省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-hebei-3",
+    "name": "邯郸",
+    "parent": "河北省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-hebei-4",
+    "name": "北平",
+    "parent": "河北省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-zhejiang-1",
+    "name": "杭州",
+    "parent": "浙江省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-zhejiang-2",
+    "name": "宁波",
+    "parent": "浙江省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-zhejiang-3",
+    "name": "金华",
+    "parent": "浙江省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-zhejiang-4",
+    "name": "温州",
+    "parent": "浙江省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-guangdong-1",
+    "name": "广州",
+    "parent": "广东省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-guangdong-2",
+    "name": "崖县",
+    "parent": "广东省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-guangdong-3",
+    "name": "汕头",
+    "parent": "广东省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-guangdong-4",
+    "name": "钦县",
+    "parent": "广东省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-fujian-1",
+    "name": "泉州",
+    "parent": "福建省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-fujian-2",
+    "name": "福州",
+    "parent": "福建省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-fujian-3",
+    "name": "厦门",
+    "parent": "福建省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-fujian-4",
+    "name": "南平",
+    "parent": "福建省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-shandong-1",
+    "name": "济南",
+    "parent": "山东省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-shandong-2",
+    "name": "青岛",
+    "parent": "山东省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-shandong-3",
+    "name": "济宁",
+    "parent": "山东省",
+    "inside_region": true
+  },
+  {
+    "id": "cn-shandong-4",
+    "name": "潍县",
+    "parent": "山东省",
+    "inside_region": true
+  }
+]

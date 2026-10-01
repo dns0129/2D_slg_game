@@ -1,0 +1,237 @@
+{
+  "projection": "+proj=laea +lat_0=30 +lon_0=105 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs +type=crs",
+  "territory_count": 130,
+  "zhejiang_count": 4,
+  "shanghai_count": 1,
+  "subdivision_checks": [
+    {
+      "province": "Xinjiang",
+      "tiles": 10,
+      "coverage_error_ratio": 3.9490756095933525e-17,
+      "overlap_ratio": -8.985578642590053e-16,
+      "valid": true
+    },
+    {
+      "province": "Xizang",
+      "tiles": 8,
+      "coverage_error_ratio": 2.920493706331268e-17,
+      "overlap_ratio": -1.296582910868493e-15,
+      "valid": true
+    },
+    {
+      "province": "Inner Mongol",
+      "tiles": 8,
+      "coverage_error_ratio": 6.711458287848098e-17,
+      "overlap_ratio": -2.133241979056783e-16,
+      "valid": true
+    },
+    {
+      "province": "Gansu",
+      "tiles": 5,
+      "coverage_error_ratio": 0.0,
+      "overlap_ratio": 1.805792595473661e-15,
+      "valid": true
+    },
+    {
+      "province": "Yunnan",
+      "tiles": 5,
+      "coverage_error_ratio": 0.0,
+      "overlap_ratio": 2.6922907754650237e-15,
+      "valid": true
+    },
+    {
+      "province": "Heilongjiang",
+      "tiles": 5,
+      "coverage_error_ratio": 0.0,
+      "overlap_ratio": 1.3495655108013922e-16,
+      "valid": true
+    },
+    {
+      "province": "Jilin",
+      "tiles": 4,
+      "coverage_error_ratio": 8.559438254801485e-17,
+      "overlap_ratio": -4.792773501630228e-16,
+      "valid": true
+    },
+    {
+      "province": "Liaoning",
+      "tiles": 4,
+      "coverage_error_ratio": 0.0,
+      "overlap_ratio": 3.124351554769376e-15,
+      "valid": true
+    },
+    {
+      "province": "Guangxi",
+      "tiles": 4,
+      "coverage_error_ratio": 3.58133739933867e-17,
+      "overlap_ratio": -5.143989364341111e-16,
+      "valid": true
+    },
+    {
+      "province": "Guangdong",
+      "tiles": 4,
+      "coverage_error_ratio": 0.0,
+      "overlap_ratio": -3.825787080468119e-15,
+      "valid": true
+    },
+    {
+      "province": "Hainan",
+      "tiles": 2,
+      "coverage_error_ratio": 2.301767272196853e-16,
+      "overlap_ratio": -1.1272536060929414e-15,
+      "valid": true
+    },
+    {
+      "province": "Fujian",
+      "tiles": 4,
+      "coverage_error_ratio": 1.7181678815364565e-16,
+      "overlap_ratio": 1.2639428608084638e-15,
+      "valid": true
+    },
+    {
+      "province": "Zhejiang",
+      "tiles": 4,
+      "coverage_error_ratio": 1.2361405621109364e-16,
+      "overlap_ratio": 3.0114839292739485e-16,
+      "valid": true
+    },
+    {
+      "province": "Shanghai",
+      "tiles": 1,
+      "coverage_error_ratio": 0.0,
+      "overlap_ratio": -2.827342407408419e-16,
+      "valid": true
+    },
+    {
+      "province": "Jiangsu",
+      "tiles": 4,
+      "coverage_error_ratio": 1.163892702199268e-16,
+      "overlap_ratio": -6.097977126188809e-16,
+      "valid": true
+    },
+    {
+      "province": "Shandong",
+      "tiles": 4,
+      "coverage_error_ratio": 9.27631150771556e-17,
+      "overlap_ratio": 1.9573239527250851e-16,
+      "valid": true
+    },
+    {
+      "province": "Hebei",
+      "tiles": 4,
+      "coverage_error_ratio": 0.0,
+      "overlap_ratio": 6.459805560721394e-16,
+      "valid": true
+    },
+    {
+      "province": "Tianjin",
+      "tiles": 1,
+      "coverage_error_ratio": 0.0,
+      "overlap_ratio": 0.0,
+      "valid": true
+    },
+    {
+      "province": "Beijing",
+      "tiles": 1,
+      "coverage_error_ratio": 0.0,
+      "overlap_ratio": 0.0,
+      "valid": true
+    },
+    {
+      "province": "Sichuan",
+      "tiles": 6,
+      "coverage_error_ratio": 0.0,
+      "overlap_ratio": 0.0,
+      "valid": true
+    },
+    {
+      "province": "Chongqing",
+      "tiles": 2,
+      "coverage_error_ratio": 3.078397912169877e-17,
+      "overlap_ratio": 1.4821053710309718e-15,
+      "valid": true
+    },
+    {
+      "province": "Guizhou",
+      "tiles": 4,
+      "coverage_error_ratio": 2.2404458596329045e-17,
+      "overlap_ratio": -1.7423006916269568e-15,
+      "valid": true
+    },
+    {
+      "province": "Hunan",
+      "tiles": 4,
+      "coverage_error_ratio": 3.2942197682828145e-17,
+      "overlap_ratio": 2.887839108849898e-16,
+      "valid": true
+    },
+    {
+      "province": "Ningxia",
+      "tiles": 2,
+      "coverage_error_ratio": 8.045496286704707e-17,
+      "overlap_ratio": -1.3170602696278615e-15,
+      "valid": true
+    },
+    {
+      "province": "Shaanxi",
+      "tiles": 4,
+      "coverage_error_ratio": 0.0,
+      "overlap_ratio": -1.483371513313327e-16,
+      "valid": true
+    },
+    {
+      "province": "Qinghai",
+      "tiles": 6,
+      "coverage_error_ratio": 3.4081505361281646e-17,
+      "overlap_ratio": -1.1959867972785134e-15,
+      "valid": true
+    },
+    {
+      "province": "Shanxi",
+      "tiles": 4,
+      "coverage_error_ratio": 4.48138608288017e-17,
+      "overlap_ratio": 0.0,
+      "valid": true
+    },
+    {
+      "province": "Jiangxi",
+      "tiles": 4,
+      "coverage_error_ratio": 4.875498613318186e-17,
+      "overlap_ratio": -5.456117581397598e-16,
+      "valid": true
+    },
+    {
+      "province": "Henan",
+      "tiles": 4,
+      "coverage_error_ratio": 0.0,
+      "overlap_ratio": -3.6735646276524236e-16,
+      "valid": true
+    },
+    {
+      "province": "Hubei",
+      "tiles": 4,
+      "coverage_error_ratio": 2.6159955013812688e-17,
+      "overlap_ratio": -8.221398864302648e-16,
+      "valid": true
+    },
+    {
+      "province": "Anhui",
+      "tiles": 4,
+      "coverage_error_ratio": 0.0,
+      "overlap_ratio": -6.530442439936462e-16,
+      "valid": true
+    }
+  ],
+  "maximum_coverage_error": 2.301767272196853e-16,
+  "maximum_overlap": 3.124351554769376e-15,
+  "game_files_sha256": {
+    "game.js": "b6054f50bb7efdb0ea56734ac40456dddea2eb6199d79878183c581092754109",
+    "index.html": "d56daa704503a18f9e6659c463a0d0ca7df4ac218b8bf2ed414c649b7860de63",
+    "styles.css": "e5fcb361984910be5a855c9f71d8463c66b4b36a2a4f88783480b395783db843"
+  },
+  "sources": {
+    "physical": "https://www.naturalearthdata.com/downloads/10m-physical-vectors/",
+    "administrative": "https://www.geoboundaries.org/api.html",
+    "elevation": "https://registry.opendata.aws/terrain-tiles/"
+  }
+}

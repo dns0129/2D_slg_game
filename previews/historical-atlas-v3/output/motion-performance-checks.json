@@ -1,0 +1,27 @@
+{
+  "environment": "jsdom CPU/DOM comparison + native Skia bitmap rendering; not measured browser FPS",
+  "before": {
+    "samples": 176,
+    "medianMs": 3.192583,
+    "p95Ms": 4.228708,
+    "svgAttributeWrites": 307606,
+    "layoutReads": 1924
+  },
+  "after": {
+    "samples": 176,
+    "medianMs": 0.815417,
+    "p95Ms": 2.726292,
+    "svgAttributeWrites": 60692,
+    "layoutReads": 0
+  },
+  "svgWritesReduction": 0.8026956561315449,
+  "layoutReadsReduction": 1,
+  "passed": [
+    "相同 176 个动画帧的 DOM 写入与布局读取显著减少",
+    "移动中复用真实位图，没有逐帧重新构建海岸线和边界路径",
+    "动画停靠后恢复完整矢量地图，缓存画面退出",
+    "50 个连续滚轮事件合并到一个帧任务，存档写入不随事件重复",
+    "平移共用帧队列，抬起鼠标后退出缓存并保留最终镜头",
+    "三国及二战省级视野均通过原生 Canvas 绘制并导出实际画面"
+  ]
+}

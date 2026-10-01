@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#f5f8f6">
+  <title>山河棋局 · 战略模拟</title><link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main id="app" class="full-map-game">
+    <section class="map-area" aria-label="战略地图">
+      <div id="map-wrap" class="map-wrap"><svg id="map" viewBox="0 0 1200 760" role="img" aria-label="可缩放的历史战略地图"></svg></div>
+    </section>
+    <header class="topbar floating-panel">
+      <div class="brand"><span class="brand-mark">山</span><div><strong>山河棋局</strong><small id="scenario-name">选择剧本</small></div></div>
+      <div class="top-actions"><button id="help-btn" class="icon-button" title="玩法说明" aria-label="玩法说明">?</button><button id="new-game-btn" class="icon-button" title="新游戏" aria-label="新游戏">＋</button></div>
+    </header>
+    <aside id="overview-panel" class="overview-panel floating-panel" aria-label="政治、经济与军事概览">
+      <div class="overview-heading"><span class="eyebrow">国家概览</span><button id="toggle-overview" class="plain-button" title="收起概览" aria-expanded="true">−</button></div>
+      <div id="overview-body" class="sidebar-scroll">
+        <h1 id="campaign-title" class="hidden">执掌山河</h1><p id="campaign-description" class="hidden"></p>
+        <section class="overview-section political-section">
+          <div id="player-card" class="player-card empty"><span>尚未选择势力</span></div>
+          <div class="section-label">政治概览 <span id="war-count">—</span></div>
+          <div id="war-overview" class="war-overview"><span class="muted">战役开始后显示交战国家</span></div>
+          <details class="faction-details"><summary>各国势力 <span id="faction-count"></span></summary><div id="faction-list" class="faction-list"></div></details>
+        </section>
+        <section class="overview-section"><div class="section-label">经济概览</div><div class="stats-grid"><div class="stat"><span>国库</span><strong id="gold-stat">—</strong></div><div class="stat"><span>每月收入</span><strong id="income-stat">—</strong></div></div></section>
+        <section class="overview-section"><div class="section-label">军事概览</div><div class="stats-grid"><div class="stat"><span>总兵力</span><strong id="army-stat">—</strong></div><div class="stat"><span>控制地块</span><strong id="province-stat">—</strong></div></div></section>
+        <details class="war-diary"><summary>最新战报</summary><div id="event-log" class="event-log"><div class="log-empty">尚未开始战役</div></div></details>
+      </div>
+    </aside>
+    <aside class="time-panel floating-panel" aria-label="当前时间">
+      <div class="time-heading"><span class="eyebrow">战役时间</span><span id="round-counter">第 1 回合</span></div>
+      <strong id="turn-label" class="current-year">等待开始</strong>
+      <span id="time-note" class="time-note">每回合推进一个月</span>
+      <button id="end-turn-btn" class="primary-button" disabled>推进一个月 <span>→</span></button>
+    </aside>
+    <div class="map-toolbar floating-panel">
+      <div class="map-search-box"><input id="map-search" type="search" placeholder="搜索历史地名…" aria-label="搜索当前剧本的历史地名" autocomplete="off"><div id="map-search-results" class="map-search-results hidden"></div></div>
+      <div class="atlas-selects"><select id="map-layer" aria-label="区划层级"><option value="auto">自动层级</option><option value="overview">国家概览</option><option value="region">州省概览</option><option value="district">省内地块</option></select><select id="map-mode" aria-label="地图显示"><option value="control">国家着色</option><option value="administration">行政底图</option></select></div>
+      <div class="map-tools"><button id="zoom-out" title="缩小">−</button><button id="zoom-in" title="放大">+</button><button id="zoom-reset" title="重置视角">⤢</button><button id="focus-selected" title="放大选中地块">⌖</button><button id="asia-full" title="浏览完整亚洲">亚洲</button></div>
+    </div>
+    <aside class="minimap-panel floating-panel" aria-label="小地图">
+      <div class="minimap-heading"><span class="eyebrow">战区导航</span><span>点击定位</span></div>
+      <svg id="mini-map" role="img" aria-label="小地图与当前视野范围"></svg>
+      <div class="minimap-caption"><span id="map-caption">历史地图</span><span id="mini-zoom">1×</span></div>
+    </aside>
+    <div class="map-status floating-panel"><span id="lod-badge">概览 · 国家</span><span id="map-hint">选择剧本开始</span><span id="map-subcaption" class="hidden"></span></div>
+    <div class="map-scale"><span id="scale-bar"></span><b id="scale-label">约 500 km</b></div><div class="compass"><span>N</span><i></i></div>
+    <aside id="inspector-panel" class="inspector floating-panel hidden" aria-label="地块详细情报">
+      <div class="inspector-heading"><span class="eyebrow">地块情报</span><button id="close-inspector" class="plain-button" title="关闭地块情报" aria-label="关闭地块情报">×</button></div>
+      <div class="inspector-inner"><div id="inspector-content" class="inspector-content"></div></div>
+    </aside>
+  </main>
+  <div id="setup-overlay" class="overlay"><div class="setup-modal"><div class="setup-aside"><div class="modal-brand"><span class="brand-mark">山</span> 山河棋局</div><div class="setup-graphic"><div class="sun"></div><div class="ridge ridge-one"></div><div class="ridge ridge-two"></div><div class="ridge ridge-three"></div><div class="river-art"></div></div><div class="setup-aside-bottom">一纸版图，万里山河。<br>每一步，都将写入历史。</div></div><div class="setup-main"><div class="eyebrow">NEW CAMPAIGN / 新的征程</div><h2>选择你的时代</h2><p id="setup-intro" class="setup-intro">在两个不同的时代争夺土地、经营国库、调度军队。</p><div id="scenario-options" class="scenario-options"></div><div class="choose-row"><div><strong>选择势力</strong><span>你将亲自指挥该势力</span></div><div id="faction-options" class="faction-options"></div></div><button id="start-btn" class="primary-button start-button">开启征程 <span>↗</span></button><button id="resume-btn" class="resume-button hidden">返回当前战役</button></div></div></div>
+
+  <div id="help-overlay" class="overlay hidden"><div class="help-modal"><button id="close-help" class="close-button">×</button><div class="eyebrow">FIELD MANUAL / 玩法指南</div><h2>如何指挥你的势力</h2><div class="help-grid"><div><b>01 · 选择领土</b><p>在概览中点击州省可放大，再点击己方地块作为出发地、相邻地块作为目标。滚轮缩放，拖动任意位置浏览。目标可以是己方领土，也可以是敌方领土。</p></div><div><b>02 · 经营内政</b><p>在己方领土征兵或发展。征兵消耗国库；发展提高该地块此后的回合收入。缩放只改变显示层级。</p></div><div><b>03 · 发起行动</b><p>选定目标和兵力后，行军或进攻。山地守军拥有防御优势，胜负也受到士气与战场波动影响。</p></div><div><b>04 · 推进回合</b><p>结束回合后，各势力依次行动并结算收入。占领全部敌方领土即可统一战区。游戏会自动保存在本机浏览器。每回合推进一个月，战局按你的行动变化；历史行政底图保留剧本起始断面。</p></div></div><button id="help-done" class="primary-button">继续游戏 <span>→</span></button></div></div>
+  <div id="toast" class="toast" aria-live="polite"></div>
+  <script src="./vendor/polygon-clipping.umd.min.js"></script>
+  <script src="./maps/atlas.js"></script>
+  <script src="./maps/motion-cache.js"></script>
+  <script src="./game.js"></script>
+</body>
+</html>
