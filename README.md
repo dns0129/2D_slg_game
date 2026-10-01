@@ -6,13 +6,37 @@
 
 在线游玩：[山河棋局](https://dns0129.github.io/2D_slg_game/)。GitHub Pages 从 `main` 分支根目录发布，后续提交会自动更新站点。
 
-双击 `index.html`，或在本目录运行：
+### macOS
+
+双击仓库根目录的 `start-game.command`，用系统为 HTML 文件设置的默认浏览器打开游戏。也可以在终端中运行：
+
+```sh
+./start-game.command
+```
+
+如果下载的 ZIP 未保留执行权限，在游戏目录运行一次 `chmod +x start-game.command`。启动脚本会定位自身所在目录，支持中文和空格路径，不需要安装 Python。
+
+### Windows
+
+在游戏目录打开 PowerShell 或 Windows Terminal，运行：
+
+```powershell
+.\start-game.cmd
+```
+
+也可以双击 `start-game.cmd`。它会用系统为 HTML 文件设置的默认浏览器打开游戏，不需要安装 Python。如果系统把 HTML 文件关联到了编辑器，请先把 `.html` 的默认应用设置为浏览器。
+
+### 本地 HTTP 服务（可选）
+
+也可直接用浏览器打开 `index.html`，或在本目录运行：
 
 ```sh
 python3 -m http.server 8765 --bind 127.0.0.1
 ```
 
 访问 <http://127.0.0.1:8765/>。地图与山体资源在本地，不依赖在线地图服务。
+
+本地文件、HTTP 服务和在线站点使用各自的浏览器存储；切换启动方式或浏览器时，原有存档不会自动迁移。
 
 ## 地图与玩法
 
