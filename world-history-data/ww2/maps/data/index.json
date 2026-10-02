@@ -1,0 +1,97 @@
+{
+ "snapshots": [
+  {
+   "snapshot": "1939-09-01",
+   "title_zh": "德国入侵波兰，第二次世界大战在欧洲爆发",
+   "title_en": "Germany invades Poland",
+   "pieces": 51021,
+   "population": 2230589919,
+   "bloc_pop": {
+    "allied": 1063755246,
+    "axis": 504030406,
+    "neutral": 662804267,
+    "contested": 0
+   }
+  },
+  {
+   "snapshot": "1940-07-01",
+   "title_zh": "法国停战后，德国控制西欧",
+   "title_en": "After the fall of France",
+   "pieces": 50956,
+   "population": 2241728109,
+   "bloc_pop": {
+    "allied": 893432536,
+    "axis": 576367313,
+    "neutral": 771928260,
+    "contested": 0
+   }
+  },
+  {
+   "snapshot": "1941-12-07",
+   "title_zh": "珍珠港事件当日，德军止步莫斯科城下",
+   "title_en": "Pearl Harbor; Germans before Moscow",
+   "pieces": 50948,
+   "population": 2261930608,
+   "bloc_pop": {
+    "allied": 1205931357,
+    "axis": 691806291,
+    "neutral": 351875352,
+    "contested": 12317608
+   }
+  },
+  {
+   "snapshot": "1942-11-01",
+   "title_zh": "轴心国扩张的最大范围（阿拉曼、斯大林格勒之前）",
+   "title_en": "Greatest Axis extent",
+   "pieces": 50947,
+   "population": 2281645178,
+   "bloc_pop": {
+    "allied": 1214198696,
+    "axis": 827898721,
+    "neutral": 232806978,
+    "contested": 6740783
+   }
+  },
+  {
+   "snapshot": "1944-06-06",
+   "title_zh": "诺曼底登陆日",
+   "title_en": "D-Day",
+   "pieces": 50947,
+   "population": 2317515819,
+   "bloc_pop": {
+    "allied": 1367152320,
+    "axis": 782088928,
+    "neutral": 160231902,
+    "contested": 8042669
+   }
+  },
+  {
+   "snapshot": "1945-09-02",
+   "title_zh": "日本签署投降书，战争结束",
+   "title_en": "Japan signs the surrender",
+   "pieces": 50869,
+   "population": 2344071189,
+   "bloc_pop": {
+    "allied": 1876499141,
+    "axis": 229833449,
+    "neutral": 237738599,
+    "contested": 0
+   }
+  }
+ ],
+ "blocs": [
+  "allied",
+  "axis",
+  "neutral",
+  "contested"
+ ],
+ "basis": [
+  "historical_dated",
+  "historical_1930",
+  "historical_1931",
+  "reconstructed_1914_1926",
+  "modern_proxy",
+  "historical_unit"
+ ],
+ "quantum": 1000
+}

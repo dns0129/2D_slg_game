@@ -14,7 +14,8 @@ from shapely.geometry import shape, mapping
 from common import ROOT
 from ww2_common import SNAPSHOTS, WW2_DB, WW2_WORK
 
-TOL = 0.004  # degrees (~400 m) for stored geometry
+TOL = 0.006  # degrees (~600 m) for stored geometry
+ND = 3  # decimals kept (~110 m)
 
 SOURCES = [
     ("geoboundaries", "geoBoundaries gbOpen", "Runfola, D. et al. (2020) geoBoundaries: A global database of political "
@@ -54,34 +55,45 @@ CREATE TABLE sources (source_id TEXT PRIMARY KEY, name TEXT, citation TEXT, url 
 CREATE TABLE snapshots (snapshot TEXT PRIMARY KEY, title_zh TEXT, title_en TEXT, n_units INTEGER,
   population_est REAL, pop_allied REAL, pop_axis REAL, pop_neutral REAL, pop_contested REAL);
 CREATE TABLE counties (
-  county_id TEXT PRIMARY KEY, name TEXT, name_zh TEXT, name_zh_note TEXT, county_kind TEXT,
+  county_key INTEGER PRIMARY KEY, county_id TEXT UNIQUE, name TEXT, name_zh TEXT, name_zh_note TEXT, county_kind TEXT,
   iso3_modern TEXT, source_level TEXT, basis TEXT, source TEXT, valid_from TEXT, valid_to TEXT,
   adm1_modern TEXT, adm2_modern TEXT,
   hist_parent TEXT, hist_parent_zh TEXT, hist_parent_kind TEXT, hist_parent_basis TEXT, hist_grandparent TEXT,
   defacto_parent TEXT, defacto_parent_zh TEXT, area_km2 REAL, label_lon REAL, label_lat REAL, geometry TEXT);
-CREATE TABLE split_pieces (piece_id TEXT PRIMARY KEY, county_id TEXT, area_km2 REAL, geometry TEXT);
+CREATE TABLE split_pieces (piece_id TEXT PRIMARY KEY, county_key INTEGER, unit_id INTEGER, area_km2 REAL,
+  geometry TEXT);
+CREATE TABLE unit_snapshot (snapshot TEXT, unit_id INTEGER, unit_gwcode INTEGER, unit_name_en TEXT,
+  unit_name_zh TEXT, unit_status TEXT, sovereign_gwcode INTEGER, sovereign_name_en TEXT, sovereign_name_zh TEXT,
+  partial_control_events TEXT, PRIMARY KEY (snapshot, unit_id)) WITHOUT ROWID;
+CREATE TABLE controls (control_id INTEGER PRIMARY KEY, controller_gwcode INTEGER, controller_name_en TEXT,
+  controller_name_zh TEXT, controller_detail_en TEXT, controller_detail_zh TEXT, control_type TEXT,
+  control_source TEXT, control_confidence TEXT, bloc TEXT);
+CREATE TABLE pop_methods (pop_method_id INTEGER PRIMARY KEY, pop_method TEXT);
 CREATE TABLE county_snapshot (
-  snapshot TEXT, piece_id TEXT, county_id TEXT, unit_id INTEGER, unit_gwcode INTEGER,
-  unit_name_en TEXT, unit_name_zh TEXT, unit_status TEXT,
-  sovereign_gwcode INTEGER, sovereign_name_en TEXT, sovereign_name_zh TEXT,
-  controller_gwcode INTEGER, controller_name_en TEXT, controller_name_zh TEXT,
-  controller_detail_en TEXT, controller_detail_zh TEXT, control_type TEXT, control_source TEXT,
-  control_confidence TEXT, bloc TEXT, partial_control_events TEXT,
-  area_km2 REAL, population_est INTEGER, pop_method TEXT,
-  PRIMARY KEY (snapshot, piece_id)) WITHOUT ROWID;
+  snapshot TEXT, county_key INTEGER, unit_id INTEGER, split INTEGER, control_id INTEGER,
+  area_km2 REAL, population_est INTEGER, pop_method_id INTEGER,
+  PRIMARY KEY (snapshot, county_key, unit_id)) WITHOUT ROWID;
+CREATE VIEW county_snapshot_full AS
+  SELECT s.snapshot, k.county_id || CASE WHEN s.split THEN '@' || s.unit_id ELSE '' END AS piece_id,
+    k.county_id, s.county_key, s.unit_id, u.unit_gwcode, u.unit_name_en, u.unit_name_zh, u.unit_status,
+    u.sovereign_gwcode, u.sovereign_name_en, u.sovereign_name_zh, c.controller_gwcode, c.controller_name_en,
+    c.controller_name_zh, c.controller_detail_en, c.controller_detail_zh, c.control_type, c.control_source,
+    c.control_confidence, c.bloc, u.partial_control_events, s.area_km2, s.population_est, m.pop_method
+  FROM county_snapshot s JOIN counties k USING (county_key) JOIN unit_snapshot u USING (snapshot, unit_id)
+  JOIN controls c USING (control_id)
+  JOIN pop_methods m USING (pop_method_id);
 CREATE TABLE control_rules (row INTEGER PRIMARY KEY, snapshots TEXT, iso3 TEXT, field TEXT, match TEXT,
   controller_name TEXT, controller_name_zh TEXT, controller_gwcode INTEGER, control_type TEXT, confidence TEXT, note TEXT);
 CREATE TABLE control_events (event_id TEXT PRIMARY KEY, unit_name TEXT, unit_gwcode INTEGER, start_date TEXT,
   end_date TEXT, scope TEXT, control_type TEXT, controller_name TEXT, controller_name_zh TEXT, controller_gwcode INTEGER,
   note TEXT);
 CREATE TABLE county_levels (iso3 TEXT PRIMARY KEY, level TEXT, median_km2 REAL, n INTEGER);
-CREATE INDEX cs_county ON county_snapshot(county_id);
-CREATE INDEX cs_controller ON county_snapshot(snapshot, controller_gwcode);
+CREATE INDEX cs_county ON county_snapshot(county_key);
 CREATE INDEX counties_parent ON counties(hist_parent);
 """
 
 
-def gj(g, tol=TOL, nd=4):
+def gj(g, tol=TOL, nd=ND):
     g = g.simplify(tol, preserve_topology=True)
 
     def r(c):
@@ -115,7 +127,8 @@ def main():
     meta = {
         "title": "World county-level administrative divisions and control, 1939-1945",
         "snapshots": ";".join(s[0] for s in SNAPSHOTS),
-        "crs": "EPSG:4326", "geometry": f"GeoJSON text simplified at {TOL} deg, coordinates to 1e-4 deg",
+        "crs": "EPSG:4326", "geometry": f"GeoJSON text simplified at {TOL} deg, coordinates rounded to {ND} decimals",
+        "main_view": "county_snapshot_full (one row per county piece and snapshot, all attributes)",
         "county_definition": "historical county/district where a historical layer exists; otherwise the present-day "
                              "geoBoundaries level closest to a typical county (~1,500 km2), see county_levels",
         "population": "estimate: GHS-POP 1975 pattern scaled to each historical unit's population for the snapshot year",
@@ -132,28 +145,41 @@ def main():
                      float(b.get("axis", 0)), float(b.get("neutral", 0)), float(b.get("contested", 0))))
 
     used = set(df.county_id)
+    key = {cid: i + 1 for i, cid in enumerate(c for c in counties.county_id if c in used)}
     rows = []
     for c in counties.itertuples():
         if c.county_id not in used:
             continue
         v = lambda x: None if (isinstance(x, float) and np.isnan(x)) else x
-        rows.append((c.county_id, v(c.name), v(c.name_zh), v(c.name_zh_note), v(c.county_kind), c.iso3, c.gb_level, c.basis,
+        rows.append((key[c.county_id], c.county_id, v(c.name), v(c.name_zh), v(c.name_zh_note), v(c.county_kind), c.iso3, c.gb_level, c.basis,
                      c.source, v(c.valid_from), v(c.valid_to), v(c.adm1_modern), v(c.adm2_modern), v(c.hist_parent),
                      v(c.hist_parent_zh), v(c.hist_parent_kind), v(c.hist_parent_basis), v(c.hist_grandparent),
                      v(c.defacto_parent), v(c.defacto_parent_zh), c.area_km2, c.label_lon, c.label_lat,
                      gj(geoms[c.county_id])))
-    con.executemany("INSERT INTO counties VALUES (" + ",".join("?" * 24) + ")", rows)
-    con.executemany("INSERT INTO split_pieces VALUES (?,?,?,?)",
-                    [(k, k.split("@")[0], float(df[df.piece_id == k].area_km2.iloc[0]) if False else None, gj(g))
-                     for k, g in pieces.items()])
-    cols = ["snapshot", "piece_id", "county_id", "unit_id", "unit_gwcode", "unit_name_en", "unit_name_zh", "unit_status",
-            "sovereign_gwcode", "sovereign_name_en", "sovereign_name_zh", "controller_gwcode", "controller_name_en",
-            "controller_name_zh", "controller_detail_en", "controller_detail_zh", "control_type", "control_source",
-            "control_confidence", "bloc", "partial_control_events", "area_km2", "population_est", "pop_method"]
+    con.executemany("INSERT INTO counties VALUES (" + ",".join("?" * 25) + ")", rows)
+    parea = df.groupby("piece_id").area_km2.max().to_dict()
+    con.executemany("INSERT INTO split_pieces VALUES (?,?,?,?,?)",
+                    [(k, key[k.split("@")[0]], int(k.split("@")[1]), parea.get(k), gj(g))
+                     for k, g in pieces.items() if "@" in k])
     df = df.drop_duplicates(["snapshot", "piece_id"])
-    df[cols].to_sql("county_snapshot", con, if_exists="append", index=False)
-    con.execute("UPDATE split_pieces SET area_km2 = (SELECT MAX(area_km2) FROM county_snapshot s "
-                "WHERE s.piece_id = split_pieces.piece_id)")
+    ucols = ["unit_gwcode", "unit_name_en", "unit_name_zh", "unit_status", "sovereign_gwcode", "sovereign_name_en",
+             "sovereign_name_zh", "partial_control_events"]
+    df.drop_duplicates(["snapshot", "unit_id"])[["snapshot", "unit_id"] + ucols] \
+        .to_sql("unit_snapshot", con, if_exists="append", index=False)
+    ccols = ["controller_gwcode", "controller_name_en", "controller_name_zh", "controller_detail_en",
+             "controller_detail_zh", "control_type", "control_source", "control_confidence", "bloc"]
+    ckey = df[ccols].fillna("").astype(str).agg("\x1f".join, axis=1)
+    codes, _ = pd.factorize(ckey)
+    df["control_id"] = codes + 1
+    df.drop_duplicates("control_id").sort_values("control_id")[["control_id"] + ccols] \
+        .to_sql("controls", con, if_exists="append", index=False)
+    mcodes, methods = pd.factorize(df.pop_method)
+    df["pop_method_id"] = mcodes + 1
+    con.executemany("INSERT INTO pop_methods VALUES (?,?)", [(i + 1, m) for i, m in enumerate(methods)])
+    df["county_key"] = df.county_id.map(key)
+    df["split"] = df.piece_id.str.contains("@").astype(int)
+    df[["snapshot", "county_key", "unit_id", "split", "control_id", "area_km2", "population_est", "pop_method_id"]] \
+        .to_sql("county_snapshot", con, if_exists="append", index=False)
     rules = pd.read_csv(ROOT / "curated" / "ww2_region_control.csv")
     rules.insert(0, "row", range(2, len(rules) + 2))
     rules.to_sql("control_rules", con, if_exists="append", index=False)

@@ -95,24 +95,32 @@ CShapes 没有画出的小岛屿属地（南洋群岛、关岛、科威特、巴
 | `meta` | 说明、坐标系、构建时间 |
 | `sources` | 数据来源、引用、许可证 |
 | `snapshots` | 六个断面及各阵营人口 |
-| `counties` | 县：名称、中文名、类别、来源层级、历史上级、现代政区、面积、标注点、几何（GeoJSON，简化 0.004°） |
+| `counties` | 县：名称、中文名、类别、来源层级、历史上级、现代政区、面积、标注点、几何（GeoJSON，简化 0.006°，坐标保留 3 位小数） |
 | `split_pieces` | 被国界切开的县的各块几何 |
-| `county_snapshot` | 主表，每个断面的每一块：政治单元、宗主、实际控制者、控制方式、来源、可信度、阵营、面积、估计人口 |
+| `county_snapshot` | 每个断面的每一块县：所属政治单元 `unit_id`、控制记录 `control_id`、面积、估计人口 |
+| `unit_snapshot` | 每个断面的政治单元：名称、地位（独立 / 殖民地 / 保护国 / 委任统治）、法理宗主、局部控制事件 |
+| `controls` | 控制记录：实际控制者、细节、控制方式、判定来源、可信度、阵营 |
+| `pop_methods` | 人口估计方法说明 |
+| `county_snapshot_full`（视图） | 上面四张表连起来的宽表，一行一块县一个断面，包含全部属性，查询时直接用它 |
 | `control_rules` | 分区控制规则原文（`row` 为 CSV 行号，与 `control_source = rule:<行号>` 对应） |
 | `control_events` | 整单元控制事件 |
 | `county_levels` | 每国代用政区所选的层级与中位面积 |
 
 ```sql
--- 1942-11-01 日本实际控制的县及人口
+-- 1942-11-01 日本实际控制的县，按估计人口排序
 SELECT c.name_zh, c.name, s.unit_name_zh, s.population_est
-FROM county_snapshot s JOIN counties c USING (county_id)
+FROM county_snapshot_full s JOIN counties c USING (county_id)
 WHERE s.snapshot = '1942-11-01' AND s.controller_gwcode = 740
 ORDER BY s.population_est DESC LIMIT 20;
 
--- 某县在六个断面的归属变化
+-- 某县在六个断面的归属变化（以基辅为例）
 SELECT snapshot, controller_name_zh, control_type, bloc
-FROM county_snapshot WHERE county_id LIKE 'UKR%' AND piece_id IN
-  (SELECT piece_id FROM county_snapshot WHERE county_id = (SELECT county_id FROM counties WHERE name = 'Kyiv' LIMIT 1));
+FROM county_snapshot_full
+WHERE county_id = (SELECT county_id FROM counties WHERE name = 'Kyiv' AND iso3_modern = 'UKR' LIMIT 1)
+ORDER BY snapshot;
+
+-- 各断面各阵营的估计人口
+SELECT snapshot, bloc, SUM(population_est) FROM county_snapshot_full GROUP BY snapshot, bloc;
 ```
 
 ## 地图数据格式（`ww2/maps/data/`）

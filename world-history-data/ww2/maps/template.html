@@ -40,9 +40,9 @@
 [hidden] { display: none !important; }
 html, body { height: 100%; }
 body { margin: 0; background: var(--paper); color: var(--ink); font: 14px/1.5 var(--f-body); overflow: hidden; }
-.app { position: relative; height: 100%; display: grid; grid-template-rows: auto 1fr; }
+.app { position: relative; height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr); grid-template-columns: minmax(0, 1fr); }
 header.bar {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px;
+  min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px;
   padding: 10px 16px; background: var(--sheet); border-bottom: 1px solid var(--rule); z-index: 3;
 }
 .brand { display: flex; flex-direction: column; min-width: 0; }
@@ -117,7 +117,7 @@ dl.kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
 .lbl.small { font: 500 11px/1.1 var(--f-body); color: var(--ink-2); }
 .loading { position: absolute; inset: 0; display: grid; place-items: center; z-index: 5; background: var(--paper); color: var(--ink-2); font: 14px var(--f-body); }
 .loading[hidden] { display: none; }
-.toggle-sheet { display: none; }
+.toggle-sheet { display: none; white-space: nowrap; flex: none; cursor: pointer; background: transparent; font: inherit; font-size: 12px; }
 @media (max-width: 760px) {
   .brand small { display: none; }
   .controls { left: 8px; right: 8px; top: auto; bottom: 8px; width: auto; max-height: 46%; }
@@ -176,7 +176,7 @@ dl.kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
       </div>
       <div class="stack search">
         <h3><label for="q">查找县</label></h3>
-        <input id="q" type="search" placeholder="例如 宛平、Kursk、京城府" autocomplete="off">
+        <input id="q" type="search" placeholder="例如 京城府、曲阜、臺北、Kursk" autocomplete="off">
         <ul class="results" id="results"></ul>
       </div>
       <p class="foot">点击任一县查看归属。数据：CShapes 2.0、geoBoundaries、Newberry 美国县界史、中研院台湾 1930、国史编纂委员会 1914–26、K. Lawson 东亚图层；人口为 GHS-POP 推算。</p>
@@ -389,7 +389,10 @@ function selectFeature(k) {
 async function loadSnap(snap) {
   if (!state.data[snap]) state.data[snap] = await getJSON(`data/snap-${snap}.json`);
   state.snap = snap; const sd = state.data[snap];
-  for (const b of document.querySelectorAll("#tabs button")) b.setAttribute("aria-selected", String(b.dataset.snap === snap));
+  for (const b of document.querySelectorAll("#tabs button")) {
+    b.setAttribute("aria-selected", String(b.dataset.snap === snap));
+    if (b.dataset.snap === snap) b.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }
   $("snapTitle").textContent = `${snap.replace(/-/g, ".")}　${sd.title_zh}`;
   const top = sd.controllers.slice(0, 4).map((c) => `${c[1]} ${fmt(c[3])}`).join("、");
   $("snapLede").textContent = `${sd.feature.length.toLocaleString()} 个县级单元。人口最多的实际控制者：${top}。`;
@@ -465,17 +468,29 @@ function wire(counties) {
   for (const b of document.querySelectorAll(".seg button")) b.onclick = () => {
     state.mode = b.dataset.mode; for (const x of document.querySelectorAll(".seg button")) x.setAttribute("aria-pressed", String(x === b));
     $("legendNote").hidden = state.mode !== "bloc"; setLayers();
+    map.setLayoutProperty("county-approx", "visibility", state.mode === "bloc" && $("tApprox").checked ? "visible" : "none");
   };
   const vis = (id, layers) => $(id).onchange = () => layers.forEach((l) => map.setLayoutProperty(l, "visibility", $(id).checked ? "visible" : "none"));
-  vis("tCounty", ["county-line"]); vis("tUnits", ["unit-line"]); vis("tTerrain", ["terrain"]); vis("tHydro", ["hydro-fill", "hydro-line"]); vis("tApprox", ["county-approx"]);
+  vis("tCounty", ["county-line"]); vis("tUnits", ["unit-line"]); vis("tTerrain", ["terrain"]); vis("tHydro", ["hydro-fill", "hydro-line"]); $("tApprox").onchange = () => map.setLayoutProperty("county-approx", "visibility",
+    state.mode === "bloc" && $("tApprox").checked ? "visible" : "none");
   $("tLabels").onchange = placeLabels;
+  if (window.innerWidth <= 760) { $("controls").classList.add("collapsed"); $("toggleSheet").textContent = "展开";
+    $("toggleSheet").setAttribute("aria-expanded", "false"); }
   $("toggleSheet").onclick = () => { const c = $("controls"); const col = c.classList.toggle("collapsed"); $("toggleSheet").textContent = col ? "展开" : "收起"; $("toggleSheet").setAttribute("aria-expanded", String(!col)); };
 
   const names = counties.county_id.map((_, ci) => [ci, (counties.cols.name_zh.lut[counties.cols.name_zh.idx[ci]] || ""), (counties.cols.name.lut[counties.cols.name.idx[ci]] || "")]);
   $("q").oninput = () => {
     const q = $("q").value.trim().toLowerCase(); const R = $("results"); R.replaceChildren(); if (q.length < 1) return;
-    const hits = names.filter(([, zh, en]) => zh.includes(q) || en.toLowerCase().includes(q)).slice(0, 8);
-    for (const [ci, zh, en] of hits) {
+    const qs = [...new Set([q, q.replace(/台/g, "臺"), q.replace(/臺/g, "台")])];
+    const rank = (t) => { let r = 9; for (const v of qs) { if (!t) continue;
+      r = Math.min(r, t === v ? 0 : t.startsWith(v) ? 1 : t.includes(v) ? 2 : 9); } return r; };
+    const hits = [];
+    for (const [ci, zh, en] of names) {
+      const r = Math.min(rank(zh), rank(en.toLowerCase()));
+      if (r < 9) hits.push([r, (zh || en).length, ci, zh, en]);
+    }
+    hits.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    for (const [, , ci, zh, en] of hits.slice(0, 8)) {
       const li = document.createElement("li"); const b = document.createElement("button"); b.type = "button";
       const a = document.createElement("span"); a.textContent = zh || en;
       const m = document.createElement("span"); m.className = "meta"; m.textContent = [col("hist_parent_zh", ci) || col("hist_parent", ci) || col("adm1_modern", ci), counties.cols.iso3.lut[counties.cols.iso3.idx[ci]]].filter(Boolean).join(" · ");
