@@ -89,3 +89,10 @@ snapshots,iso3,field,match,controller_name,controller_name_zh,controller_gwcode,
 1945-09-02,AUT,adm1_modern,Kärnten|Steiermark,United Kingdom,英国,200,allied_occupation,whole,British occupation zone
 1945-09-02,AUT,adm1_modern,Niederösterreich|Burgenland,Soviet Union,苏联,365,allied_occupation,whole,Soviet occupation zone
 1945-09-02,AUT,adm1_modern,Wien,Allied powers (four-power Vienna),盟国（维也纳四国共管）,-1,allied_occupation,whole,Four sectors of Vienna
+1944-06-06|1945-09-02,MHL,*,*,United States,美国,2,military_occupation,approximate,"Kwajalein, Majuro and Eniwetok taken February 1944; Jaluit, Wotje, Mili and Maloelap bypassed and held by Japan until September 1945"
+1945-09-02,MNP,*,*,United States,美国,2,military_occupation,approximate,Saipan and Tinian taken June-August 1944; Rota held by Japan until September 1945
+1945-09-02,MNP,name,Rota|Northern Islands,Japanese forces pending surrender,待受降日军,740,surrendering_forces,approximate,Bypassed Japanese garrisons
+1945-09-02,PLW|FSM,*,*,Japanese forces pending surrender,待受降日军,740,surrendering_forces,approximate,"Truk, Ponape, Yap and Babeldaob bypassed; Peleliu and Angaur in US hands from late 1944"
+1945-09-02,PLW,adm1_modern,Peleliu|Angaur,United States,美国,2,military_occupation,whole,"Battle of Peleliu and Angaur, September-November 1944"
+1941-12-07|1942-11-01|1944-06-06,GRL,*,*,United States,美国,2,defense_agreement,whole,Defended by the United States under the April 1941 agreement; the Danish governors kept civil administration
+1941-12-07|1942-11-01|1944-06-06,ISL,*,*,Allied powers (US and British forces),同盟国（美英驻军）,-1,allied_occupation,whole,British occupation from May 1940; US forces took over defence from July 1941

@@ -436,6 +436,36 @@ def china_names(rows):
     print("China counties with Chinese names:", hit)
 
 
+def colony_gaps(rows):
+    """Colonies that no county layer covers (geoBoundaries has no New Caledonia or French
+    Polynesia): add the CShapes outline of the whole unit as one county-level area."""
+    import topo
+    from common import RAW
+    from ww2_common import SNAPSHOTS
+    iso = {"New Caledonia": "NCL", "French Polynesia": "PYF"}
+    arcs, gs = topo.load(RAW / "cshapes_2_gw.topojson")
+    dates = [s[0] for s in SNAPSHOTS]
+    geoms = [r["geom"] for r in rows]
+    tree = STRtree(geoms)
+    done = []
+    added = []
+    for g in gs:
+        p = g["properties"]
+        if p["status"] == "independent" or not any(p["start"] <= d <= p["end"] for d in dates):
+            continue
+        u = make_valid(topo.to_shape(arcs, g))
+        near = [geoms[i] for i in tree.query(u, predicate="intersects")] + [d for d in done if d.intersects(u)]
+        rest = polys(u.difference(unary_union(near))) if near else polys(u)
+        if rest is None or rest.area < 0.8 * u.area:
+            continue
+        done.append(rest)
+        added.append(dict(county_id=f"CSH-{p['fid']}", name=p["country_name"], iso3=iso.get(p["country_name"], "XXX"),
+                          gb_level="CShapes unit", basis="historical_unit", adm1_modern=None, adm2_modern=None,
+                          source="CShapes 2.0 outline of the whole colony (no county-level layer available)", geom=rest))
+    print("colonies without county coverage:", [a["name"] for a in added])
+    return added
+
+
 # ---------------------------------------------------------------- main
 
 def main():
@@ -455,6 +485,7 @@ def main():
     base = [r for r in base if not len(htree.query(r["geom"].representative_point(), predicate="within"))]
     print("proxies replaced by historical layers (by location):", before - len(base))
     rows = base + hist
+    rows += colony_gaps(rows)
     attach_parents(rows)
     china_names(rows)
     for r in rows:

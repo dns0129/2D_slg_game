@@ -37,8 +37,9 @@
   --sea: #10181d; --land: #232b2c; --allied: #3987e5; --axis: #d95926; --contested: #199e70; --neutral: #5a5f5a;
   --focus: #6aa9f0; --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px rgb(0 0 0 / 0.35); color-scheme: dark;
 }
+[hidden] { display: none !important; }
 html, body { height: 100%; }
-body { background: var(--paper); color: var(--ink); font: 14px/1.5 var(--f-body); overflow: hidden; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 14px/1.5 var(--f-body); overflow: hidden; }
 .app { position: relative; height: 100%; display: grid; grid-template-rows: auto 1fr; }
 header.bar {
   display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px;
@@ -193,13 +194,13 @@ const TYPE_ZH = {
   independent: "本国统治", colony: "殖民统治", protectorate: "保护国", mandate: "委任统治", occupied: "军事占领",
   military_occupation: "军事占领", annexation: "吞并", partition: "瓜分", client_state: "傀儡 / 附庸政权",
   collaborationist_state: "合作政权（维希）", allied_occupation: "盟军占领", front_line: "前线争夺", besieged: "被围",
-  resistance_base: "抗日根据地", leased_territory: "租借地", surrendering_forces: "待受降", satellite_state: "卫星国",
+  resistance_base: "抗日根据地", leased_territory: "租借地", surrendering_forces: "待受降", defense_agreement: "按防务协定驻军", satellite_state: "卫星国",
   liberated: "已解放", military_intervention: "军事干预", "N/A": "—"
 };
 const BASIS_ZH = {
   historical_dated: ["历史界线（按日期）", "hist"], historical_1930: ["历史界线（1930）", "hist"],
   historical_1931: ["历史界线（1931）", "hist"], reconstructed_1914_1926: ["据 1914–26 资料重建", "recon"],
-  modern_proxy: ["现代界线代用", ""]
+  modern_proxy: ["现代界线代用", ""], historical_unit: ["整个殖民地轮廓（无县级数据）", ""]
 };
 const DENSITY_STEPS = [5, 25, 50, 100, 250, 500];
 

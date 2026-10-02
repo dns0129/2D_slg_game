@@ -26,7 +26,8 @@ Q = 1000  # coordinate units per degree
 TOL_COUNTY = 0.008
 TOL_UNIT = 0.02
 BLOCS = ["allied", "axis", "neutral", "contested"]
-BASIS = ["historical_dated", "historical_1930", "historical_1931", "reconstructed_1914_1926", "modern_proxy"]
+BASIS = ["historical_dated", "historical_1930", "historical_1931", "reconstructed_1914_1926", "modern_proxy",
+         "historical_unit"]
 CONF = ["whole", "approximate"]
 
 
@@ -132,6 +133,7 @@ def main():
     arcs, gs = topo.load(RAW / "cshapes_2_gw.topojson")
     unit_ids = sorted(set().union(*[set(d.unit_id) for d in snaps.values()]))
     ug = {g["properties"]["fid"]: topo.to_shape(arcs, g) for g in gs if g["properties"]["fid"] in unit_ids}
+    unit_ids = [u for u in unit_ids if u in ug]  # territories CShapes does not draw have no outline
     (OUT / "geo-units.bin").write_bytes(encode([ug[u] for u in unit_ids], TOL_UNIT))
     uidx = {u: i for i, u in enumerate(unit_ids)}
 
@@ -148,17 +150,19 @@ def main():
                                          pop=("population_est", "sum")).reset_index()
         lab = {}
         for u in units.itertuples():
+            if u.unit_id not in ug:
+                continue
             p = ug[u.unit_id].representative_point()
             lab[uidx[u.unit_id]] = [u.name_zh or u.name_en, round(p.x, 2), round(p.y, 2), int(u.pop), round(ug[u.unit_id].area, 2)]
         ctrl_pop = d.groupby(["controller_gwcode", "controller_name_zh", "bloc"]).population_est.sum().reset_index() \
             .sort_values("population_est", ascending=False)
         doc = {
             "snapshot": snap, "title_zh": tzh, "title_en": ten,
-            "feature": [fidx[p] for p in d.piece_id], "unit": [uidx[u] for u in d.unit_id],
+            "feature": [fidx[p] for p in d.piece_id], "unit": [uidx.get(u, -1) for u in d.unit_id],
             "bloc": [BLOCS.index(b) for b in d.bloc], "conf": [CONF.index(c) if c in CONF else 0 for c in d.control_confidence],
             "ctrl_gw": [int(x) for x in d.controller_gwcode],
             "pop": [int(x) for x in d.population_est], "luts": luts, "rows": rows,
-            "units_active": sorted(set(uidx[u] for u in d.unit_id)), "unit_labels": lab,
+            "units_active": sorted(set(uidx[u] for u in d.unit_id if u in uidx)), "unit_labels": lab,
             "controllers": [[int(r.controller_gwcode), r.controller_name_zh, r.bloc, int(r.population_est)]
                             for r in ctrl_pop.head(40).itertuples()],
             "bloc_pop": {b: int(d[d.bloc == b].population_est.sum()) for b in BLOCS},

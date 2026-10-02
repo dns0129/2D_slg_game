@@ -51,6 +51,33 @@ STATE = {255: ("Germany", "德国"), 325: ("Italy", "意大利"), 740: ("Japan",
          -20: ("Front line (contested)", "前线（双方争夺）"), -2: ("Chinese Communist Party", "中国共产党"),
          -30: ("Tuvan People's Republic", "图瓦人民共和国"), -3: ("United Nations", "联合国")}
 
+# Small territories that CShapes 2.0 does not draw: their counties would otherwise be
+# attached to the nearest unit. iso3 -> (unit_id, name_en, name_zh, status, sovereign gw,
+# approximate population c. 1940, rounded; used instead of the unit_year table).
+_SSM = (-1001, "South Seas Mandate (Japanese)", "南洋群岛（日本委任统治地）", "mandate", 740, 130000)
+_GEI = (-1002, "Gilbert and Ellice Islands (British)", "吉尔伯特和埃利斯群岛（英属）", "colony", 200, 35000)
+ISLAND_UNITS = {
+    "MNP": _SSM, "PLW": _SSM, "FSM": _SSM, "MHL": _SSM, "KIR": _GEI, "TUV": _GEI,
+    "GUM": (-1003, "Guam (US territory)", "关岛（美国属地）", "colony", 2, 22000),
+    "ASM": (-1004, "American Samoa (US territory)", "美属萨摩亚（美国属地）", "colony", 2, 13000),
+    "WSM": (-1005, "Western Samoa (New Zealand mandate)", "西萨摩亚（新西兰委任统治地）", "mandate", 920, 60000),
+    "NIU": (-1006, "Niue (New Zealand)", "纽埃（新西兰属地）", "colony", 920, 4000),
+    "TON": (-1007, "Tonga (British protectorate)", "汤加（英国保护国）", "protectorate", 200, 34000),
+    "NRU": (-1008, "Nauru (Australian-administered mandate)", "瑙鲁（澳大利亚管理的委任统治地）", "mandate", 900, 3400),
+    "VUT": (-1009, "New Hebrides (Anglo-French condominium)", "新赫布里底（英法共管地）", "colony", 200, 45000),
+    "KWT": (-1010, "Kuwait (British protectorate)", "科威特（英国保护国）", "protectorate", 200, 75000),
+    "BHR": (-1011, "Bahrain (British protectorate)", "巴林（英国保护国）", "protectorate", 200, 90000),
+    "GRL": (-1012, "Greenland (Danish colony)", "格陵兰（丹麦殖民地）", "colony", 390, 18000),
+    "ATG": (-1013, "Antigua (British Leeward Islands)", "安提瓜（英属背风群岛）", "colony", 200, 40000),
+    "KNA": (-1014, "St Kitts-Nevis (British Leeward Islands)", "圣基茨和尼维斯（英属背风群岛）", "colony", 200, 41000),
+    "DMA": (-1015, "Dominica (British)", "多米尼克（英属）", "colony", 200, 47000),
+    "LCA": (-1016, "St Lucia (British Windward Islands)", "圣卢西亚（英属向风群岛）", "colony", 200, 70000),
+    "VCT": (-1017, "St Vincent (British Windward Islands)", "圣文森特（英属向风群岛）", "colony", 200, 61000),
+    "GRD": (-1018, "Grenada (British Windward Islands)", "格林纳达（英属向风群岛）", "colony", 200, 72000),
+    "SYC": (-1019, "Seychelles (British)", "塞舌尔（英属）", "colony", 200, 32000),
+    "STP": (-1020, "São Tomé and Príncipe (Portuguese)", "圣多美和普林西比（葡属）", "colony", 235, 60000),
+}
+
 # Alliance bloc of each controller by snapshot (simplified; neutral otherwise)
 S = [s[0] for s in SNAPSHOTS]
 AXIS = {255: S, 325: S[:4] + [], 740: S, 317: S[:5], -12: S[1:5], -10: S,
@@ -226,7 +253,7 @@ def main(only=None):
             pt = g.representative_point()
             cand = list(tree.query(g, predicate="intersects"))
             parts = []
-            if c["basis"] != "modern_proxy" or len(cand) <= 1:
+            if c["basis"] != "modern_proxy" or len(cand) <= 1 or c["iso3"] in ISLAND_UNITS:
                 hit = [i for i in cand if ug[i].contains(pt)] or cand or [tree.nearest(pt)]
                 parts = [(hit[0], None)]
             else:
@@ -252,9 +279,14 @@ def main(only=None):
         for pid, cid, i, g in snap_pieces:
             c = crow[cid]
             u = act[i]
-            status = u["status"]
-            uen, uzh = namer(u["country_name"], status, year)
-            sov_gw = u["gwcode"] if status == "independent" else int(u["owner"])
+            iu = ISLAND_UNITS.get(c["iso3"])
+            if iu:
+                u = {"fid": iu[0], "gwcode": None, "country_name": iu[1], "status": iu[3]}
+                status, uen, uzh, sov_gw = iu[3], iu[1], iu[2], iu[4]
+            else:
+                status = u["status"]
+                uen, uzh = namer(u["country_name"], status, year)
+                sov_gw = u["gwcode"] if status == "independent" else int(u["owner"])
             sov_en, sov_zh = STATE.get(sov_gw) or state_name.get(str(sov_gw)) or (None, None)
             ctrl = dict(gw=sov_gw, en=sov_en, zh=sov_zh, detail=None, detail_zh=None, type=status, source="cshapes",
                         conf="whole")
@@ -307,11 +339,15 @@ def main(only=None):
             if c["basis"] == "historical_dated":
                 us_state_base[c["hist_parent"]] += r["pop_base_1975"]
         state_code = {n: k for k, n in zip(*_us_states())}
+        island_pop = {v[0]: v[5] for v in ISLAND_UNITS.values()}
         for r in cur:
             c = crow[r["county_id"]]
             if c["basis"] == "historical_dated" and state_code.get(c["hist_parent"]) in st and us_state_base[c["hist_parent"]] > 0:
                 f = st[state_code[c["hist_parent"]]] / us_state_base[c["hist_parent"]]
                 r["pop_method"] = "GHS-1975 pattern scaled to state census estimate"
+            elif r["unit_id"] in island_pop and by_unit[r["unit_id"]] > 0:
+                f = island_pop[r["unit_id"]] / by_unit[r["unit_id"]]
+                r["pop_method"] = "GHS-1975 pattern scaled to an approximate territory population c. 1940"
             elif by_unit[r["unit_id"]] > 0 and (r["unit_id"] in upop):
                 f = upop[r["unit_id"]] / by_unit[r["unit_id"]]
                 r["pop_method"] = "GHS-1975 pattern scaled to unit population"
