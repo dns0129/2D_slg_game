@@ -1,0 +1,91 @@
+snapshots,iso3,field,match,controller_name,controller_name_zh,controller_gwcode,control_type,confidence,note
+1939-09-01|1940-07-01|1941-12-07|1942-11-01|1944-06-06,SVK,*,*,Slovak Republic (German client state),斯洛伐克共和国（德国附庸）,317,client_state,whole,Proclaimed 14 March 1939 under German protection
+1939-09-01|1940-07-01|1941-12-07|1942-11-01|1944-06-06,UKR,adm1_modern,Zakarpattia Oblast,Hungary,匈牙利,310,annexation,whole,Carpatho-Ukraine annexed by Hungary in March 1939
+1939-09-01|1940-07-01|1941-12-07|1942-11-01|1944-06-06,LTU,name,Klaipėda City Municipality|Klaipėda District Municipality|Neringos savivaldybė|Šilutė District Municipality|Pagėgių savivaldybė,Germany,德国,255,annexation,whole,Memel Territory annexed by Germany in March 1939
+1940-07-01|1941-12-07|1942-11-01|1944-06-06,POL,*,*,Germany,德国,255,military_occupation,whole,Annexed districts and the General Government
+1940-07-01,BLR,*,*,Soviet Union,苏联,365,annexation,whole,Western Belarus annexed by the USSR in November 1939
+1940-07-01,UKR,adm1_modern,Lviv Oblast|Volyn Oblast|Rivne Oblast|Ternopil Oblast|Ivano-Frankivsk Oblast|Chernivtsi Oblast,Soviet Union,苏联,365,annexation,whole,Western Ukraine annexed in 1939; Northern Bukovina occupied 28 June 1940
+1940-07-01|1941-12-07|1942-11-01,FRA,*,*,Vichy France (unoccupied zone),维希法国（自由区）,220,collaborationist_state,whole,Southern zone governed from Vichy under the June 1940 armistice
+1940-07-01|1941-12-07|1942-11-01,FRA,adm2_modern,Aisne|Ardennes|Aube|Calvados|Côtes d'Armor|Doubs|Essonne|Eure|Eure-et-Loir|Finistère|Hauts-de-Seine|Ille-et-Vilaine|Loire-Atlantique|Loiret|Maine-et-Loire|Manche|Marne|Haute-Marne|Mayenne|Meurthe-et-Moselle|Meuse|Morbihan|Nièvre|Oise|Orne|Paris|Sarthe|Seine-Maritime|Seine-Saint-Denis|Seine-et-Marne|Somme|Deux-Sèvres|Vendée|Charente-Maritime|Vosges|Yonne|Côte-d'Or|Haute-Saône|Territoire de Belfort|Val-d'Oise|Val-de-Marne|Yvelines|Gironde|Landes,Germany,德国,255,military_occupation,whole,German-occupied zone (Militärverwaltung in Frankreich)
+1940-07-01|1941-12-07|1942-11-01,FRA,name,Dole|Autun|Chalon-sur-Saône|Moulins|Bourges|Vierzon|Blois|Vendôme|Tours|Chinon|Poitiers|Châtellerault|Angoulême|Cognac|Bayonne,Germany,德国,255,military_occupation,approximate,Arrondissement on the occupied side of the demarcation line (département split by the line)
+1940-07-01|1941-12-07|1942-11-01,FRA,adm2_modern,Nord|Pas-de-Calais,Germany,德国,255,military_occupation,whole,Attached to the German military administration in Belgium and Northern France
+1940-07-01|1941-12-07|1942-11-01|1944-06-06,FRA,adm2_modern,Bas-Rhin|Haut-Rhin|Moselle,Germany,德国,255,annexation,whole,Alsace and Moselle annexed de facto by Germany
+1944-06-06,FRA,adm2_modern,Corse-du-Sud|Haute-Corse,Free France (French Committee of National Liberation),自由法国（法兰西民族解放委员会）,220,liberated,whole,Corsica liberated in October 1943
+1941-12-07|1942-11-01|1944-06-06,EST|LVA|LTU,*,*,Germany,德国,255,military_occupation,whole,Reichskommissariat Ostland
+1941-12-07|1942-11-01,BLR,*,*,Germany,德国,255,military_occupation,whole,Reichskommissariat Ostland / rear area of Army Group Centre
+1941-12-07|1942-11-01,UKR,*,*,Germany,德国,255,military_occupation,whole,Reichskommissariat Ukraine / military zone / District of Galicia
+1941-12-07|1942-11-01|1944-06-06,UKR,adm1_modern,Zakarpattia Oblast,Hungary,匈牙利,310,annexation,whole,Annexed by Hungary in 1939
+1941-12-07|1942-11-01,UKR,adm1_modern,Odessa Oblast|Chernivtsi Oblast,Romania,罗马尼亚,360,military_occupation,whole,Romanian Transnistria Governorate and reannexed Bukovina
+1941-12-07,UKR,adm1_modern,Luhansk Oblast,Front line (contested),前线（双方争夺）,-20,front_line,approximate,Front ran along the western edge of the oblast; Soviet-held until July 1942
+1941-12-07,UKR,adm1_modern,Sevastopol,Soviet Union,苏联,365,besieged,whole,Sevastopol under siege until July 1942
+1941-12-07|1942-11-01,MDA,*,*,Romania,罗马尼亚,360,annexation,whole,Bessarabia reannexed by Romania; Transnistria under Romanian administration
+1941-12-07|1942-11-01|1944-06-06,RUS,adm1_modern,Pskov Oblast,Germany,德国,255,military_occupation,whole,Occupied July 1941 - July 1944
+1941-12-07|1942-11-01,RUS,adm1_modern,Smolensk Oblast|Bryansk Oblast|Oryol Oblast|Kursk Oblast|Belgorod Oblast,Germany,德国,255,military_occupation,approximate,Occupied (eastern edge on the front line)
+1941-12-07,RUS,adm1_modern,Kaluga Oblast,Germany,德国,255,military_occupation,approximate,Mostly occupied; Soviet winter counteroffensive began 5 December
+1941-12-07,RUS,adm1_modern,Novgorod Oblast|Tula Oblast|Moscow Oblast|Tver Oblast|Rostov Oblast,Front line (contested),前线（双方争夺）,-20,front_line,approximate,Front line ran through the region
+1941-12-07,UKR,adm1_modern,Donetsk Oblast|Kharkiv Oblast,Germany,德国,255,military_occupation,approximate,Mostly occupied; eastern edge on the front line
+1941-12-07,RUS,name,Slantsevsky District|Gatchinsky District|Volosovsky District|Jaama District|Laukaa District|Tusina District|Kirishsky District|Tihvinä District,Germany,德国,255,military_occupation,approximate,South of Leningrad (Tikhvin held 8 Nov - 9 Dec 1941)
+1942-11-01,RUS,name,Slantsevsky District|Gatchinsky District|Volosovsky District|Jaama District|Laukaa District|Tusina District|Kirishsky District,Germany,德国,255,military_occupation,approximate,South of Leningrad during the siege
+1941-12-07|1942-11-01|1944-06-06,RUS,name,Vyborgsky District|Käkisalmi District,Finland,芬兰,375,military_occupation,whole,Karelian Isthmus retaken by Finland in 1941 (until June 1944)
+1941-12-07|1942-11-01|1944-06-06,RUS,name,Petroskoi District|Aunus District|Prääsä District|Kontupohja District|Pitkäranta District|Sortavala District|Lahdenpohja District|Suojärvi District|Medvezhyegorsky District|Mujejärvi District,Finland,芬兰,375,military_occupation,approximate,East Karelia under Finnish military administration
+1941-12-07|1942-11-01,RUS,name,Lotinapelto District,Front line (contested),前线（双方争夺）,-20,front_line,approximate,Svir front
+1942-11-01,UKR,*,*,Germany,德国,255,military_occupation,whole,Whole of Ukraine occupied after the 1942 summer offensive
+1942-11-01,UKR,adm1_modern,Odessa Oblast|Chernivtsi Oblast,Romania,罗马尼亚,360,military_occupation,whole,Romanian Transnistria Governorate and reannexed Bukovina
+1942-11-01,UKR,adm1_modern,Zakarpattia Oblast,Hungary,匈牙利,310,annexation,whole,Annexed by Hungary in 1939
+1942-11-01,RUS,adm1_modern,Rostov Oblast|Krasnodar Krai|Adygea|Stavropol Krai|Karachay-Cherkessia|Kabardino-Balkaria,Germany,德国,255,military_occupation,approximate,Occupied in the 1942 Caucasus offensive (Black Sea coast south of Novorossiysk held by the Red Army)
+1942-11-01,RUS,adm1_modern,Novgorod Oblast|Kaluga Oblast|Tver Oblast|Voronezh Oblast|Volgograd Oblast|Kalmykia|North Ossetia–Alania,Front line (contested),前线（双方争夺）,-20,front_line,approximate,"Front line ran through the region (Rzhev salient, Voronezh, Stalingrad, Elista, Ordzhonikidze)"
+1944-06-06,BLR,adm1_modern,Brest|Grodno|Minsk|Minsk City,Germany,德国,255,military_occupation,whole,Occupied until Operation Bagration (from 22 June 1944)
+1944-06-06,BLR,adm1_modern,Vitebsk|Mogilev,Front line (contested),前线（双方争夺）,-20,front_line,approximate,"Front line east of Vitebsk, Orsha and Mogilev"
+1944-06-06,UKR,adm1_modern,Lviv Oblast,Germany,德国,255,military_occupation,whole,District of Galicia (liberated July 1944)
+1944-06-06,UKR,adm1_modern,Volyn Oblast|Ivano-Frankivsk Oblast,Front line (contested),前线（双方争夺）,-20,front_line,approximate,Front line through Kovel and the Carpathian foothills
+1944-06-06,MDA,*,*,Front line (contested),前线（双方争夺）,-20,front_line,approximate,Red Army held the north and east; Chișinău under Romanian control until August 1944
+1944-06-06,ROU,name,BOTOSANI,Soviet Union,苏联,365,military_occupation,approximate,North-eastern Romania occupied by the Red Army from April 1944
+1941-12-07|1942-11-01|1944-06-06,HRV|BIH,*,*,Independent State of Croatia (Axis client state),克罗地亚独立国（轴心国附庸）,-12,client_state,approximate,Dalmatian coast annexed by Italy until September 1943; large partisan-held areas
+1941-12-07|1942-11-01|1944-06-06,SVN,*,*,Germany,德国,255,annexation,approximate,"North annexed by Germany; Ljubljana Province by Italy (to Sept 1943, then German); Prekmurje by Hungary"
+1941-12-07|1942-11-01|1944-06-06,SRB,*,*,Germany,德国,255,military_occupation,whole,Military Administration in Serbia
+1941-12-07|1942-11-01|1944-06-06,SRB,adm1_modern,North Backa District|South Backa District|West Backa District,Hungary,匈牙利,310,annexation,whole,Bačka annexed by Hungary in 1941
+1941-12-07|1942-11-01|1944-06-06,SRB,adm1_modern,Syrmia District,Independent State of Croatia (Axis client state),克罗地亚独立国（轴心国附庸）,-12,client_state,whole,Syrmia part of the NDH
+1941-12-07|1942-11-01,XKX,*,*,Italy (Albanian protectorate),意大利（阿尔巴尼亚保护国）,325,annexation,approximate,"Most of Kosovo attached to Italian-ruled Albania; north German, east Bulgarian"
+1944-06-06,XKX,*,*,Germany,德国,255,military_occupation,approximate,Albania and Kosovo under German occupation after the Italian armistice
+1941-12-07|1942-11-01|1944-06-06,MKD,*,*,Bulgaria,保加利亚,355,annexation,approximate,Vardar Macedonia annexed by Bulgaria; western part attached to Albania
+1941-12-07|1942-11-01,MKD,adm1_modern,Polog|Southwest,Italy (Albanian protectorate),意大利（阿尔巴尼亚保护国）,325,annexation,approximate,Western Macedonia attached to Italian-ruled Albania
+1941-12-07|1942-11-01,MNE,*,*,Italy,意大利,325,military_occupation,whole,Italian Governorate of Montenegro
+1944-06-06,MNE,*,*,Germany,德国,255,military_occupation,whole,German occupation after the Italian armistice
+1941-12-07|1942-11-01|1944-06-06,GRC,adm2_modern,Anatolikis Makedonias kai Thr*,Bulgaria,保加利亚,355,annexation,whole,Eastern Macedonia and Thrace annexed by Bulgaria
+1941-12-07|1942-11-01|1944-06-06,ROU,name,SATU MARE|MARAMURES|BIHOR|SALAJ|CLUJ|BISTRITA-NASAUD|MURES|HARGHITA|COVASNA,Hungary,匈牙利,310,annexation,approximate,Northern Transylvania awarded to Hungary (Second Vienna Award 1940); Bihor and Mureș only partly
+1944-06-06,ITA,adm2_modern,Sicilia|Sardegna|Calabria|Basilicata|Puglia|Campania|Molise|Lazio,Allied powers / Kingdom of Italy,盟国 / 意大利王国,-1,allied_occupation,whole,Liberated (Rome on 4 June 1944); Allied Military Government and the co-belligerent Kingdom of Italy
+1944-06-06,ITA,adm2_modern,Abruzzo,Front line (contested),前线（双方争夺）,-20,front_line,approximate,Gustav Line front breaking up
+1944-06-06,ITA,adm2_modern,Toscana|Umbria|Marche|Emilia-Romagna|Liguria|Lombardia|Piemonte|Veneto|Friuli Venezia Giulia|Trentino-Alto Adige|Valle d'Aosta,Germany / Italian Social Republic,德国 / 意大利社会共和国,255,military_occupation,whole,German occupation and the Italian Social Republic (Salò)
+1941-12-07|1942-11-01|1944-06-06|1945-09-02,IRN,adm1_modern,East Azerbaijan|West Azerbaijan|Ardabil|Gilan|Mazandaran|Golestan|Zanjan|Qazvin|North Khorasan|Razavi Khorasan,Soviet Union,苏联,365,military_occupation,approximate,Soviet occupation zone in northern Iran (Iranian administration continued)
+1941-12-07|1942-11-01|1944-06-06|1945-09-02,IRN,adm1_modern,Khuzestan|Kermanshah,United Kingdom,英国,200,military_occupation,approximate,British occupation zone in south-western Iran
+1942-11-01,EGY,adm1_modern,Matrouh Governorate,Axis powers (Germany/Italy),轴心国（德国/意大利）,-10,military_occupation,approximate,Western Desert held by Panzerarmee Afrika up to El Alamein
+1939-09-01|1940-07-01|1941-12-07|1945-09-02,CHN,adm1_modern,Hong Kong Special Administrative Region,United Kingdom,英国,200,colony,whole,British colony of Hong Kong (Japanese attack on 8 December 1941; British return 30 August 1945)
+1942-11-01|1944-06-06,CHN,adm1_modern,Hong Kong Special Administrative Region,Japan,日本,740,military_occupation,whole,Japanese occupation of Hong Kong
+1939-09-01|1940-07-01|1941-12-07|1942-11-01|1944-06-06|1945-09-02,CHN,adm1_modern,Macau Special Administrative Region|Macao Special Administrative Region,Portugal,葡萄牙,235,colony,whole,Portuguese Macau (neutral throughout the war)
+1945-09-02,TWN,*,*,Japan (pending transfer to the Republic of China),日本（待移交中华民国）,740,surrendering_forces,whole,Japanese administration until the ROC takeover on 25 October 1945
+1945-09-02,JPN,adm1_modern,Okinawa Prefecture,United States,美国,2,military_occupation,whole,US military government of the Ryukyus
+1942-11-01|1944-06-06|1945-09-02,IND,adm1_modern,Andaman and Nicobar Islands,Japan,日本,740,military_occupation,whole,Japanese occupation March 1942 - October 1945
+1942-11-01|1944-06-06,GUM,*,*,Japan,日本,740,military_occupation,whole,Japanese occupation of Guam (December 1941 - August 1944)
+1942-11-01,KIR,adm1_modern,Gilbert Islands,Japan,日本,740,military_occupation,whole,Japanese occupation of the Gilberts (retaken November 1943)
+1942-11-01|1944-06-06|1945-09-02,NRU,*,*,Japan,日本,740,military_occupation,whole,Japanese occupation of Nauru (August 1942 - September 1945)
+1942-11-01,PNG,adm1_modern,Morobe Province|Madang Province|East Sepik Province|West Sepik (Sandaun) Province|East New Britain Province|West New Britain Province|New Ireland Province|Manus Province|Autonomous Region of Bougainville,Japan,日本,740,military_occupation,approximate,Japanese-held north coast and islands
+1942-11-01,PNG,adm1_modern,Northern (Oro) Province,Front line (contested),前线（双方争夺）,-20,front_line,approximate,Kokoda Track and Buna-Gona fighting
+1944-06-06,PNG,adm1_modern,East Sepik Province|East New Britain Province|New Ireland Province,Japan,日本,740,military_occupation,approximate,Bypassed Japanese garrisons at Wewak and Rabaul
+1944-06-06,PNG,adm1_modern,Autonomous Region of Bougainville,Front line (contested),前线（双方争夺）,-20,front_line,approximate,Allied perimeter at Torokina
+1942-11-01,SLB,adm1_modern,Western|Isabel|Choiseul,Japan,日本,740,military_occupation,approximate,Japanese-held central Solomons
+1942-11-01,SLB,adm1_modern,Guadalcanal,Front line (contested),前线（双方争夺）,-20,front_line,whole,Guadalcanal campaign
+1944-06-06,MYS,adm1_modern,Kedah|Perlis|Kelantan|Terengganu,Thailand,泰国,800,annexation,whole,Four northern Malay states transferred to Thailand by Japan in October 1943
+1942-11-01|1944-06-06,MMR,name,Kengtung|Mong Pan,Thailand,泰国,800,annexation,approximate,Thai occupation of the eastern Shan states (annexed as Saharat Thai Doem in 1943)
+1939-09-01|1940-07-01|1941-12-07|1942-11-01|1944-06-06,RUS,adm1_modern,Tuva,Tuvan People's Republic (Soviet satellite),图瓦人民共和国（苏联卫星国）,-30,satellite_state,whole,Nominally independent until annexed by the USSR in October 1944
+1945-09-02,DEU,adm1_modern,Schleswig-Holstein|Hamburg|Niedersachsen|Nordrhein-Westfalen,United Kingdom,英国,200,allied_occupation,whole,British occupation zone
+1945-09-02,DEU,adm1_modern,Bayern|Hessen|Bremen,United States,美国,2,allied_occupation,whole,American occupation zone
+1945-09-02,DEU,adm2_modern,Stuttgart|Karlsruhe,United States,美国,2,allied_occupation,whole,American occupation zone (northern Württemberg-Baden)
+1945-09-02,DEU,adm1_modern,Rheinland-Pfalz|Saarland,France,法国,220,allied_occupation,whole,French occupation zone
+1945-09-02,DEU,adm2_modern,Freiburg|Tübingen,France,法国,220,allied_occupation,whole,"French occupation zone (South Baden, Württemberg-Hohenzollern)"
+1945-09-02,DEU,adm1_modern,Brandenburg|Mecklenburg-Vorpommern|Sachsen|Sachsen-Anhalt|Thüringen,Soviet Union,苏联,365,allied_occupation,whole,Soviet occupation zone
+1945-09-02,DEU,adm1_modern,Berlin,Allied powers (four-power Berlin),盟国（柏林四国共管）,-1,allied_occupation,whole,Four sectors of Berlin
+1945-09-02,AUT,adm1_modern,Vorarlberg|Tirol,France,法国,220,allied_occupation,whole,French occupation zone
+1945-09-02,AUT,adm1_modern,Salzburg|Oberösterreich,United States,美国,2,allied_occupation,approximate,American zone (Upper Austria north of the Danube was Soviet)
+1945-09-02,AUT,adm1_modern,Kärnten|Steiermark,United Kingdom,英国,200,allied_occupation,whole,British occupation zone
+1945-09-02,AUT,adm1_modern,Niederösterreich|Burgenland,Soviet Union,苏联,365,allied_occupation,whole,Soviet occupation zone
+1945-09-02,AUT,adm1_modern,Wien,Allied powers (four-power Vienna),盟国（维也纳四国共管）,-1,allied_occupation,whole,Four sectors of Vienna
