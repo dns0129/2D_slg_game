@@ -4,6 +4,8 @@ The MapLibre stylesheet is inlined (the published page may load styles only
 from Google Fonts); the script is vendored and falls back to public CDNs.
 Each per-date page opens on its own snapshot and can switch to the others.
 """
+import base64
+
 from ww2_common import SNAPSHOTS, WW2_OUT, WW2_WORK
 
 MAPS = WW2_OUT / "maps"
@@ -20,8 +22,12 @@ def main():
         body = tpl.replace("__DEFAULT_SNAPSHOT__", snap)
         (MAPS / name).write_text(head + body + "\n</html>\n")
         print(MAPS / name)
-    # the artifact host supplies the document skeleton itself
+    # the artifact host supplies the document skeleton itself and serves only text and media types,
+    # so the binary geometry goes along base64-encoded
     (WW2_WORK / "artifact_index.html").write_text(tpl.replace("__DEFAULT_SNAPSHOT__", "1942-11-01"))
+    for name in ("geo", "geo-units"):
+        raw = (MAPS / "data" / f"{name}.bin").read_bytes()
+        (WW2_WORK / f"{name}.b64.txt").write_text(base64.b64encode(raw).decode())
 
 
 if __name__ == "__main__":

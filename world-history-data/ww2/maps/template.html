@@ -232,7 +232,16 @@ function decodeGeo(buf) {
 }
 
 async function getJSON(u) { const r = await fetch(u); if (!r.ok) throw new Error(u + " " + r.status); return r.json(); }
-async function getBin(u) { const r = await fetch(u); if (!r.ok) throw new Error(u + " " + r.status); return r.arrayBuffer(); }
+async function getBin(u) {
+  // geometry is binary; where only text files can be served it ships as <name>.b64.txt
+  const r = await fetch(u).catch(() => null);
+  if (r && r.ok) return r.arrayBuffer();
+  const t = await fetch(u.replace(/\.bin$/, ".b64.txt"));
+  if (!t.ok) throw new Error(u + " " + t.status);
+  const s = atob((await t.text()).trim()); const a = new Uint8Array(s.length);
+  for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i);
+  return a.buffer;
+}
 
 function col(name, ci) { const c = state.counties.cols[name]; return c.lut[c.idx[ci]]; }
 
