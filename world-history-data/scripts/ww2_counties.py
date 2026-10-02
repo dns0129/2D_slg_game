@@ -437,12 +437,12 @@ def china_names(rows):
 
 
 def colony_gaps(rows):
-    """Colonies that no county layer covers (geoBoundaries has no New Caledonia or French
-    Polynesia): add the CShapes outline of the whole unit as one county-level area."""
+    """Colonies that no county layer covers (geoBoundaries has no Guadeloupe, New Caledonia
+    or French Polynesia): add the CShapes outline of the whole unit as one county-level area."""
     import topo
     from common import RAW
     from ww2_common import SNAPSHOTS
-    iso = {"New Caledonia": "NCL", "French Polynesia": "PYF"}
+    iso = {"New Caledonia and Dependencies": "NCL", "French Polynesia": "PYF", "Guadeloupe": "GLP"}
     arcs, gs = topo.load(RAW / "cshapes_2_gw.topojson")
     dates = [s[0] for s in SNAPSHOTS]
     geoms = [r["geom"] for r in rows]

@@ -125,6 +125,8 @@ dl.kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
   .detail { left: 8px; right: 8px; top: 8px; width: auto; max-height: 42%; }
   .toggle-sheet { display: inline-block; }
 }
+.busy #map { cursor: progress; }
+.busy nav.tabs button[aria-selected="true"] .d::after { content: " · 绘制中"; font-family: var(--f-body); font-size: 11px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 
@@ -194,7 +196,7 @@ const TYPE_ZH = {
   independent: "本国统治", colony: "殖民统治", protectorate: "保护国", mandate: "委任统治", occupied: "军事占领",
   military_occupation: "军事占领", annexation: "吞并", partition: "瓜分", client_state: "傀儡 / 附庸政权",
   collaborationist_state: "合作政权（维希）", allied_occupation: "盟军占领", front_line: "前线争夺", besieged: "被围",
-  resistance_base: "抗日根据地", leased_territory: "租借地", surrendering_forces: "待受降", defense_agreement: "按防务协定驻军", satellite_state: "卫星国",
+  resistance_base: "抗日根据地", leased_territory: "租借地", surrendering_forces: "待受降", defense_agreement: "按防务协定驻军", free_french: "自由法国", satellite_state: "卫星国",
   liberated: "已解放", military_intervention: "军事干预", "N/A": "—"
 };
 const BASIS_ZH = {
@@ -393,7 +395,9 @@ async function loadSnap(snap) {
   $("snapLede").textContent = `${sd.feature.length.toLocaleString()} 个县级单元。人口最多的实际控制者：${top}。`;
   state.hover = null; state.selected = null; $("detail").hidden = true; $("tip").hidden = true;
   map.removeFeatureState({ source: "counties" });
+  document.body.classList.add("busy");
   map.getSource("counties").setData(buildFeatures(sd));
+  map.once("idle", () => document.body.classList.remove("busy"));
   map.getSource("units").setData(unitFeatures(sd));
   setLayers(); placeLabels();
   try { history.replaceState(null, "", "#" + snap); } catch (e) {}
@@ -419,6 +423,7 @@ async function boot() {
   }
   map = new maplibregl.Map({ container: "map", center: [60, 30], zoom: 1.6, minZoom: 1, maxZoom: 11, attributionControl: false,
     renderWorldCopies: false, style: { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": cssVar("--sea") } }] } });
+  if (window.innerWidth > 760) map.setPadding({ left: 320, top: 0, right: 0, bottom: 0 });
   map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
   map.addControl(new maplibregl.ScaleControl({ unit: "metric" }), "bottom-left");
   map.on("load", () => onLoad(index).catch(fail));
@@ -441,6 +446,7 @@ async function onLoad(index) {
     map.addLayer({ id: "county-hover", type: "line", source: "counties", paint: { "line-color": cssVar("--ink"), "line-width": ["case", ["boolean", ["feature-state", "sel"], false], 2.4, ["boolean", ["feature-state", "hov"], false], 1.4, 0] } });
     const start = (location.hash || "").slice(1);
     await loadSnap(index.snapshots.some((s) => s.snapshot === start) ? start : DEFAULT_SNAPSHOT);
+    await new Promise((r) => map.once("idle", r));
     $("loading").hidden = true;
 }
 

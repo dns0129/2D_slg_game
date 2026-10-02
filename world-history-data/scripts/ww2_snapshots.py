@@ -49,7 +49,8 @@ STATE = {255: ("Germany", "德国"), 325: ("Italy", "意大利"), 740: ("Japan",
          350: ("Greece", "希腊"), 560: ("South Africa", "南非"), 20: ("Canada", "加拿大"), 920: ("New Zealand", "新西兰"),
          -1: ("Allied powers", "同盟国"), -10: ("Axis powers", "轴心国"), -12: ("Independent State of Croatia", "克罗地亚独立国"),
          -20: ("Front line (contested)", "前线（双方争夺）"), -2: ("Chinese Communist Party", "中国共产党"),
-         -30: ("Tuvan People's Republic", "图瓦人民共和国"), -3: ("United Nations", "联合国")}
+         -30: ("Tuvan People's Republic", "图瓦人民共和国"), -3: ("United Nations", "联合国"),
+         -4: ("Free France", "自由法国")}
 
 # Small territories that CShapes 2.0 does not draw: their counties would otherwise be
 # attached to the nearest unit. iso3 -> (unit_id, name_en, name_zh, status, sovereign gw,
@@ -77,12 +78,22 @@ ISLAND_UNITS = {
     "SYC": (-1019, "Seychelles (British)", "塞舌尔（英属）", "colony", 200, 32000),
     "STP": (-1020, "São Tomé and Príncipe (Portuguese)", "圣多美和普林西比（葡属）", "colony", 235, 60000),
 }
+_DOD = (-1021, "Italian Islands of the Aegean (Dodecanese)", "意属爱琴海群岛（多德卡尼斯）", "colony", 325, 120000)
+_KUR = (-1022, "Kuril Islands (Japan)", "千岛群岛（日本）", "independent", 740, 17000)
+ISLAND_UNITS.update({("GRC", n): _DOD for n in (
+    "Rhodes", "Halki", "Tilos", "Symi", "Nisyros", "Kos", "Kalymnos", "Leros", "Leipsoi", "Patmos", "Agathonisi",
+    "Kasos", "Karpathos", "Kastellorizo", "Astypalaia")})
+ISLAND_UNITS.update({("RUS", n): _KUR for n in ("Yuzhno-Kurilsky District", "Kurilsky District", "Severo-Kurilsky District")})
+
+
+def island_unit(c):
+    return ISLAND_UNITS.get(c["iso3"]) or ISLAND_UNITS.get((c["iso3"], c.get("name")))
 
 # Alliance bloc of each controller by snapshot (simplified; neutral otherwise)
 S = [s[0] for s in SNAPSHOTS]
 AXIS = {255: S, 325: S[:4] + [], 740: S, 317: S[:5], -12: S[1:5], -10: S,
         310: S[2:5], 360: S[2:5], 355: S[2:5], 375: S[2:5], 800: S[3:5]}
-ALLIED = {200: S, 710: S, -2: S, -1: S, 900: S, 20: S, 920: S, 560: S, 750: S, 290: S, 210: S, 211: S, 385: S, 212: S,
+ALLIED = {200: S, 710: S, -2: S, -1: S, -4: S, 900: S, 20: S, 920: S, 560: S, 750: S, 290: S, 210: S, 211: S, 385: S, 212: S,
           390: S[5:], 350: S[2:], 345: S[2:], 365: S[2:], 2: S[2:], 220: [S[0], S[4], S[5]],
           140: S[3:], 70: S[3:], 40: S[3:], 42: S[3:], 41: S[3:], 90: S[3:], 91: S[3:], 92: S[3:], 93: S[3:],
           94: S[3:], 95: S[3:], 530: S[3:], 645: S[3:], 630: S[4:], 100: S[4:], 145: S[4:], 450: S[4:],
@@ -164,6 +175,8 @@ def rule_match(rule, c):
         return False
     if rule["field"] == "*":
         return True
+    if rule["field"] == "unit":
+        return any(m in (c["unit"], c["unit_cs"]) for m in rule["match"].split("|"))
     v = c.get(rule["field"])
     if not isinstance(v, str):
         return False
@@ -253,7 +266,7 @@ def main(only=None):
             pt = g.representative_point()
             cand = list(tree.query(g, predicate="intersects"))
             parts = []
-            if c["basis"] != "modern_proxy" or len(cand) <= 1 or c["iso3"] in ISLAND_UNITS:
+            if c["basis"] != "modern_proxy" or len(cand) <= 1 or island_unit(c):
                 hit = [i for i in cand if ug[i].contains(pt)] or cand or [tree.nearest(pt)]
                 parts = [(hit[0], None)]
             else:
@@ -279,7 +292,7 @@ def main(only=None):
         for pid, cid, i, g in snap_pieces:
             c = crow[cid]
             u = act[i]
-            iu = ISLAND_UNITS.get(c["iso3"])
+            iu = island_unit(c)
             if iu:
                 u = {"fid": iu[0], "gwcode": None, "country_name": iu[1], "status": iu[3]}
                 status, uen, uzh, sov_gw = iu[3], iu[1], iu[2], iu[4]
@@ -302,8 +315,11 @@ def main(only=None):
                 gw, den, dzh, typ, src, conf = ov
                 ctrl.update(gw=gw, en=STATE.get(gw, (den,))[0], zh=STATE.get(gw, (None, dzh))[1], detail=den, detail_zh=dzh,
                             type=typ, source=src, conf=conf)
+            cu = dict(c, unit=uen, unit_cs=u["country_name"])
             for k, r in enumerate(rules):
-                if snap in r["snapshots"].split("|") and rule_match(r, c):
+                if r["field"] in ("*", "unit") and ctrl["source"].startswith("overlay:"):
+                    continue  # whole-unit rules do not override the East Asian occupation layers
+                if snap in r["snapshots"].split("|") and rule_match(r, cu):
                     gw = int(r["controller_gwcode"])
                     ctrl.update(gw=gw, en=STATE.get(gw, (r["controller_name"],))[0],
                                 zh=STATE.get(gw, (None, r["controller_name_zh"]))[1], detail=r["controller_name"],
