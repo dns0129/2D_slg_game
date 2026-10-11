@@ -1,0 +1,289 @@
+{
+  "sources": {
+    "historical": {
+      "name": "world_map_history 历史细分区划",
+      "year": "1939-09-01",
+      "url": "https://github.com/dns0129/world_map_history/tree/430e8b9c99fdf05be2d4f094e64659a75fdf4100",
+      "license": "逐块保留原图源；Newberry / OpenHistoricalMap CC0；台湾 CC BY-NC-SA 4.0",
+      "note": "只恢复当日有效的县级和地区级轮廓；不采用点位 Voronoi 推算的县界。"
+    },
+    "usa": {
+      "name": "美国 Census 县界（Plotly 数据副本）",
+      "year": "2010 人口普查数据",
+      "url": "https://github.com/plotly/datasets/blob/0c447c47b757ad74edecab31f0d72f849d2e67c2/geojson-counties-fips.json",
+      "license": "美国 Census 公有领域",
+      "note": "县界、名称取自资料版本；2026 的国家与控制判定继承现有省级地图。"
+    },
+    "china": {
+      "name": "mapchina 0.1.0 区县地图",
+      "year": "2018 前后（资料版本）",
+      "url": "https://github.com/xmc811/mapchina/tree/053136c1c9c01742681bf9224ecad4d8c0bf9df0",
+      "license": "GPL-3.0；本图源的导出区县数据同样按 GPL-3.0 提供",
+      "note": "原数据坐标为 WGS84，名称和六位区划代码保留。不是 2026 最新区划普查。"
+    },
+    "india": {
+      "name": "DataMeet 印度 Census 地区界",
+      "year": "2011 人口普查区划",
+      "url": "https://github.com/datameet/maps/tree/b3fbbde595310b397a55d718e0958ce249a4fa1f/Districts",
+      "license": "CC BY 2.5 India",
+      "note": "District 为地区级，不能等同于所有国家的县。区划名称保留资料原名。"
+    },
+    "brazil": {
+      "name": "IBGE 巴西市镇界（geodata-br）",
+      "year": "geodata-br 2021 仓库版本",
+      "url": "https://github.com/tbrugz/geodata-br/tree/c39dfb040bfd466fe2a476bafed00749c5c42f16",
+      "license": "CC0-1.0",
+      "note": "Município 为县级相当单位；轮廓、名称不宣称是 2026 最新版本。"
+    },
+    "naturalearth": {
+      "name": "Natural Earth 原始细分行政区",
+      "year": "Natural Earth 5.1.1，约 2020 年",
+      "url": "https://github.com/nvkelso/natural-earth-vector/tree/ca96624a56bd078437bca8184e78163e5039ad19",
+      "license": "公有领域",
+      "note": "恢复原地图合并为大区的省、郡、部门等细分单位；1:1000 万制图轮廓，非地籍界线。"
+    }
+  },
+  "source_files": {
+    "1939/admin.json": "72feb6615f5e4a8ea000b8e008808c84dad2f1d9668e057d1b246ce749c5022c",
+    "1939/geo-admin.bin": "3f245696053cffa90e6ece087b8c57f41037aeb8c5278475a0d4675feecac31a",
+    "1939/geo.bin": "acd39a13870fd039c54154583e16c4960ff198224621ea8a621bf451f8dfb6d7",
+    "1939/snap-1939-09-01.json": "0efcef4ada038890041b1bad25b8fe463dec2478e029901f71b2f5c85d8775a2",
+    "usa-2026.geojson": "e540149b7525e71ee6b6cab6dea2a95205f11e0c3e7374d27a7c9c47ea96e8c0",
+    "china.rda": "5ac3795894d61fe9c01060c5a0f58f4076d3e53c48a441e0f48d54acd3f687be",
+    "brazil.geojson": "8dff9ec76216198929c5a8a30d1576df0cd66d572d914c2376528c3849ec8d72",
+    "ne-admin1.geojson": "22d0e3ad85eb3e27f17cabf8ba2d50e554fbc27a87796ff891d958185da62fb5",
+    "india/india-districts.shp": "3636e627a519f67b4615b6a97df48c2b279e8c7b2566d3bfbc3eda1d06e33206",
+    "india/india-districts.shx": "12b6028dfac9e3f20686b3d0a44f9d3989acfdb3f3cda853881d1cf2d8579eab",
+    "india/india-districts.dbf": "2c7b03578fdf41a4c4e29941a564fa90bf0b0e4f865f5e54481ef7ac8494eb7d",
+    "india/india-districts.prj": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"
+  },
+  "scenarios": {
+    "1939-09-01": {
+      "units": 4259,
+      "pieces": 4426,
+      "countries": [
+        {
+          "name": "中华民国",
+          "count": 2
+        },
+        {
+          "name": "丹麦",
+          "count": 1
+        },
+        {
+          "name": "加拿大",
+          "count": 2
+        },
+        {
+          "name": "匈牙利",
+          "count": 13
+        },
+        {
+          "name": "南斯拉夫",
+          "count": 8
+        },
+        {
+          "name": "卢森堡",
+          "count": 5
+        },
+        {
+          "name": "危地马拉",
+          "count": 4
+        },
+        {
+          "name": "厄瓜多尔",
+          "count": 3
+        },
+        {
+          "name": "土耳其",
+          "count": 1
+        },
+        {
+          "name": "墨西哥",
+          "count": 80
+        },
+        {
+          "name": "巴拿马",
+          "count": 2
+        },
+        {
+          "name": "德国",
+          "count": 300
+        },
+        {
+          "name": "意大利",
+          "count": 52
+        },
+        {
+          "name": "拉脱维亚",
+          "count": 1
+        },
+        {
+          "name": "斯洛伐克",
+          "count": 2
+        },
+        {
+          "name": "日本",
+          "count": 83
+        },
+        {
+          "name": "智利",
+          "count": 36
+        },
+        {
+          "name": "比利时",
+          "count": 1
+        },
+        {
+          "name": "法国",
+          "count": 96
+        },
+        {
+          "name": "波兰",
+          "count": 38
+        },
+        {
+          "name": "泰国",
+          "count": 7
+        },
+        {
+          "name": "爱尔兰",
+          "count": 28
+        },
+        {
+          "name": "爱沙尼亚",
+          "count": 1
+        },
+        {
+          "name": "玻利维亚",
+          "count": 1
+        },
+        {
+          "name": "瑞典",
+          "count": 3
+        },
+        {
+          "name": "瑞士",
+          "count": 1
+        },
+        {
+          "name": "秘鲁",
+          "count": 119
+        },
+        {
+          "name": "立陶宛",
+          "count": 3
+        },
+        {
+          "name": "罗马尼亚",
+          "count": 13
+        },
+        {
+          "name": "美国",
+          "count": 3128
+        },
+        {
+          "name": "苏联",
+          "count": 20
+        },
+        {
+          "name": "英国",
+          "count": 203
+        },
+        {
+          "name": "荷兰",
+          "count": 47
+        },
+        {
+          "name": "萨尔瓦多",
+          "count": 1
+        },
+        {
+          "name": "西班牙",
+          "count": 12
+        },
+        {
+          "name": "阿根廷",
+          "count": 4
+        }
+      ]
+    },
+    "2026": {
+      "units": 13494,
+      "pieces": 14712,
+      "countries": [
+        {
+          "name": "中国",
+          "count": 2880
+        },
+        {
+          "name": "几内亚",
+          "count": 33
+        },
+        {
+          "name": "北马其顿",
+          "count": 84
+        },
+        {
+          "name": "印度",
+          "count": 640
+        },
+        {
+          "name": "台湾",
+          "count": 21
+        },
+        {
+          "name": "巴西",
+          "count": 5563
+        },
+        {
+          "name": "布基纳法索",
+          "count": 44
+        },
+        {
+          "name": "意大利",
+          "count": 109
+        },
+        {
+          "name": "拉脱维亚",
+          "count": 119
+        },
+        {
+          "name": "斯洛文尼亚",
+          "count": 193
+        },
+        {
+          "name": "法国",
+          "count": 96
+        },
+        {
+          "name": "科索沃",
+          "count": 30
+        },
+        {
+          "name": "美国",
+          "count": 3221
+        },
+        {
+          "name": "英国",
+          "count": 232
+        },
+        {
+          "name": "菲律宾",
+          "count": 118
+        },
+        {
+          "name": "西班牙",
+          "count": 43
+        },
+        {
+          "name": "马耳他",
+          "count": 68
+        }
+      ]
+    }
+  },
+  "precision_degrees": 1e-05,
+  "simplify_degrees": 0.0005,
+  "checks": "Every exported polygon is valid and is covered by its existing province/control parcel."
+}

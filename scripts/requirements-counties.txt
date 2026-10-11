@@ -1,0 +1,5 @@
+shapely==2.2.0
+pyproj==3.8.0
+pyshp==3.1.6
+rdata==1.1.0
+xarray==2026.9.0

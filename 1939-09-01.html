@@ -6,14 +6,14 @@
   <title>世界地图 · 1939 / 2026</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="vendor/maplibre-gl.css">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=counties-1">
 </head>
 <body>
 <div class="app">
   <header class="bar">
     <div class="brand">
       <h1>世界地图 · 1939 / 2026</h1>
-      <small>1939 与 2026 · 省级地块 · 阵营、国家与实际控制区</small>
+      <small>1939 与 2026 · 省级与县级地块 · 阵营、国家与实际控制区</small>
     </div>
     <nav class="tabs" id="tabs" role="tablist" aria-label="地图年份"></nav>
   </header>
@@ -52,6 +52,7 @@
         <h3>图层</h3>
         <div class="toggles">
           <label><input type="checkbox" id="tProv" checked> 省界</label>
+          <label><input type="checkbox" id="tCounties" checked> 县界 / 地区界</label>
           <label><input type="checkbox" id="tBorders" checked> 国界 / 控制线</label>
           <label><input type="checkbox" id="tTerrain" checked> 山体晕渲</label>
           <label><input type="checkbox" id="t3d" checked> 3D 地形</label>
@@ -61,13 +62,15 @@
           <label><input type="checkbox" id="tCities" checked> 重要城市</label>
         </div>
         <div class="city-key" id="cityKey" aria-label="城市图例"></div>
+        <p class="foot" id="countyStatus" role="status">放大后显示有资料的县级 / 地区级区块</p>
+        <button type="button" id="countyRetry" hidden>重试载入县界</button>
       </div>
       <div class="stack search">
-        <h3><label for="q">查找省份</label></h3>
-        <input id="q" type="search" placeholder="例如 京畿道、Kursk、Seine、北海道" autocomplete="off">
+        <h3><label for="q">查找省份 / 区县</label></h3>
+        <input id="q" type="search" placeholder="例如 东城区、Los Angeles、北海道" autocomplete="off">
         <ul class="results" id="results"></ul>
       </div>
-      <p class="foot">点击地图先选中国家，再点击同一国家进入省级。1939 地块固定为 1939-09-01；2026 使用原项目的当今世界数据。斜线表示近似控制区，缺少省界的地区保留整个政治单元。数据来源与许可见 <a href="docs/SOURCES.md">图源说明</a>。</p>
+      <p class="foot">点击地图先选中国家，再点击同一国家进入省级；放大后可直接点选县级 / 地区级区块。1939 地块固定为 1939-09-01；2026 使用原项目的当今世界数据。细分区块按真实界线资料逐步补充，资料年份见详情；缺少细分资料的地区保留省级。斜线表示近似控制区。数据来源与许可见 <a href="docs/SOURCES.md">图源说明</a>。</p>
     </aside>
     <aside class="sheet detail" id="detail" hidden aria-live="polite"></aside>
     <div class="tip" id="tip" hidden></div>
@@ -75,6 +78,7 @@
   </div>
 </div>
 <script src="vendor/maplibre-gl.js"></script>
-<script src="app.js"></script>
+<script src="counties.js?v=counties-1"></script>
+<script src="app.js?v=counties-1"></script>
 </body>
 </html>

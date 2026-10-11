@@ -1,5 +1,7 @@
 # 图源、数据口径与许可
 
+后续添加的县级 / 地区级细分层使用独立的静态文件，来源、覆盖范围和许可见 [县级区块说明](COUNTIES.md)。以下说明针对最初复制的省级地图；其几何保持原样。
+
 地图前端与静态资源复制自 [dns0129/world_map_history](https://github.com/dns0129/world_map_history)，提交 [29285e0](https://github.com/dns0129/world_map_history/tree/29285e05c747b84620908a2c29d45769a115ba0f)。仅复制原项目 `ww2/maps/` 的地图架构、1939-09-01 与 2026 地块，以及两者共用的地形、水系、字形。源仓库没有修改。
 
 原始说明：[项目 README](https://github.com/dns0129/world_map_history/blob/29285e05c747b84620908a2c29d45769a115ba0f/README.md)、[区划与控制范围说明](https://github.com/dns0129/world_map_history/blob/29285e05c747b84620908a2c29d45769a115ba0f/ww2/README.md)。复制文件的来源校验值在 `data/copy-manifest.json`。

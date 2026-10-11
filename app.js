@@ -223,7 +223,7 @@ function paintSelection() {
     let v;
     if (s) {
       const inC = countryOf(sd, k) === s.country;
-      v = s.level === "province" ? (state.admin.feature_admin[sd.feature[k]] === s.admin ? 2 : inC ? 3 : 0) : inC ? 1 : 0;
+      v = s.level !== "country" ? (state.admin.feature_admin[sd.feature[k]] === s.admin ? 2 : inC ? 3 : 0) : inC ? 1 : 0;
     }
     if (state.selPainted.get(k) === v) continue;
     changed = true;
@@ -232,7 +232,7 @@ function paintSelection() {
   }
   // the outline of the selected country (control view) or political unit, and of the selected province
   const want = { "ctrl-sel": s && ctl ? s.country : null, "unit-sel": s && !ctl && s.country < 100000 ? s.country : null,
-    "prov-sel": s && s.level === "province" ? s.admin : null };
+    "prov-sel": s && s.level !== "country" ? s.admin : null };
   for (const [layer, source] of Object.entries(SEL_LINES)) {
     const was = state.selLines[layer];
     if (was === want[layer]) continue;
@@ -258,6 +258,7 @@ function applyPaint() {
   map.setLayoutProperty("ctrl-line", "visibility", ctl && on ? "visible" : "none");
   map.setLayoutProperty("unit-line", "visibility", !ctl && on ? "visible" : "none");
   paintSelection();
+  countyPaint();
 }
 function applyBase() {
   const b = BASE[state.base];
@@ -284,6 +285,7 @@ function setLabels() {
   const on = $("tLabels").checked ? "visible" : "none", rivers = $("tLabels").checked && $("tHydro").checked ? "visible" : "none";
   map.setLayoutProperty("country-lbl", "visibility", on); map.setLayoutProperty("prov-lbl", "visibility", on);
   for (const l of riverLabelLayers()) map.setLayoutProperty(l, "visibility", rivers);
+  countyPaint();
 }
 
 // ------------------------------------------------------------------ cities
@@ -495,8 +497,9 @@ function showProvince(k) {
   D.append(dl2, el("p", "foot", "来源：" + col("source", ai)));
 }
 
-function clearSelection() { state.sel = null; $("detail").hidden = true; applyPaint(); }
+function clearSelection() { countyState.selectionTicket++; state.sel = null; $("detail").hidden = true; applyPaint(); }
 function selectCountry(cid, fly, kAny) {
+  countyState.selectionTicket++;
   const sd = sdNow(); if (kAny == null) kAny = piecesOf(cid)[0];
   if (kAny == null) return;
   state.sel = { level: "country", country: cid, admin: -1, piece: kAny }; applyPaint(); showCountry(cid, kAny);
@@ -504,6 +507,7 @@ function selectCountry(cid, fly, kAny) {
     if (bb) map.fitBounds(bb, { padding: 60, maxZoom: 6, duration: 700 }); }
 }
 function selectProvince(k, fly) {
+  countyState.selectionTicket++;
   const sd = sdNow(); const ai = state.admin.feature_admin[sd.feature[k]];
   state.sel = { level: "province", country: countryOf(sd, k), admin: ai, piece: k }; applyPaint(); showProvince(k);
   if (fly) { const [x, y] = state.admin.label[ai]; map.flyTo({ center: [x, y], zoom: Math.max(map.getZoom(), state.admin.area[ai] > 2e5 ? 4.5 : 5.5) }); }
@@ -561,6 +565,7 @@ async function loadSnap(snap) {
   if (ticket !== state.loading) return;  // another tab was clicked while this one loaded
   const prev = state.sel && state.data[state.snap] ? { admin: state.sel.admin, level: state.sel.level } : null;
   state.snap = snap; const sd = sdNow();
+  countyReset();
   $("loading").hidden = true;
   $("q").value = ""; $("results").replaceChildren();
   for (const b of document.querySelectorAll("#tabs button")) {
@@ -584,15 +589,18 @@ async function loadSnap(snap) {
   map.getSource("cities").setData(cityFeatures(sd));
   map.once("idle", () => { document.body.classList.remove("busy"); prefetchNear(snap); });
   applyPaint(); legend(); setLabels(); setHash();
+  refreshCounties();
   if (prev && prev.level === "province") { const k = sd.feature.findIndex((f) => state.admin.feature_admin[f] === prev.admin); if (k >= 0) selectProvince(k, false); }
 }
 
 function setMode(mode) {
+  countyState.selectionTicket++;
   const s = state.sel; state.mode = mode;
   for (const x of document.querySelectorAll("[data-mode]")) x.setAttribute("aria-pressed", String(x.dataset.mode === mode));
   state.sel = null; $("detail").hidden = true;
   applyPaint(); legend(); setLabels(); setHash();
   if (s && s.level === "province") selectProvince(s.piece, false);
+  if (s && s.level === "county") selectCounty(s.county);
 }
 
 function addPattern() {
@@ -617,7 +625,7 @@ async function boot() {
     b.append(el("span", "d", s.snapshot.replace(/-/g, ".")), el("span", "t", s.title_zh));
     b.onclick = () => loadSnap(s.snapshot).catch(fail); tabs.append(b);
   }
-  map = new maplibregl.Map({ container: "map", center: [60, 30], zoom: 1.6, minZoom: 1, maxZoom: 11, attributionControl: false,
+  map = new maplibregl.Map({ container: "map", center: [60, 30], zoom: 1.6, minZoom: 1, maxZoom: 15, attributionControl: false,
     renderWorldCopies: false, localIdeographFontFamily: "'Noto Serif SC', 'Songti SC', 'SimSun', serif", maxPitch: 65, transformCameraUpdate: cameraUpdate,
     style: { version: 8, glyphs: "glyph://{fontstack}/{range}", sources: {},
       layers: [{ id: "bg", type: "background", paint: { "background-color": BASE[state.base].sea } }] } });
@@ -739,6 +747,7 @@ async function onLoad(index) {
     filter: ["step", ["zoom"], false, 4, [">=", ["get", "a"], 30000], 5, [">=", ["get", "a"], 6000], 6, [">=", ["get", "a"], 1000], 7, true],
     layout: { "text-field": ["get", "n"], "text-font": ["sans"], "text-size": 11, "text-max-width": 8, "symbol-sort-key": ["-", 0, ["get", "a"]], "text-padding": 3 },
     paint: { "text-color": "#39423f", "text-halo-color": HALO, "text-halo-width": 1.3 } });
+  setupCounties();
   map.addLayer({ id: "city", type: "symbol", source: "cities",
     filter: ["step", ["zoom"], ["<=", ["get", "r"], 0], 2.6, ["<=", ["get", "r"], 1], 3.8, true],
     layout: { "icon-image": ["get", "ic"], "icon-size": ["interpolate", ["linear"], ["zoom"], 2, 0.8, 6, 1],
@@ -785,13 +794,24 @@ function wire(admin) {
   map.on("mouseleave", "city", () => { state.cityHover = false; $("tip").hidden = true; });
   map.on("mousemove", "prov-fill", (e) => {
     const f = e.features[0]; if (!f || state.cityHover) return; map.getCanvas().style.cursor = "pointer";
+    const county = countyHit(e);
+    if (county) {
+      if (state.hover !== null) { map.setFeatureState({ source: "prov", id: state.hover }, { hov: false }); state.hover = null; }
+      if (countyState.hover !== null && countyState.hover !== county.id) map.setFeatureState({ source: "counties", id: countyState.hover }, { hov: false });
+      countyState.hover = county.id; map.setFeatureState({ source: "counties", id: county.id }, { hov: true });
+      countyTip(e, county); redrawDraped(); return;
+    }
+    if (countyState.hover !== null) { map.setFeatureState({ source: "counties", id: countyState.hover }, { hov: false }); countyState.hover = null; }
     if (state.hover !== null && state.hover !== f.id) map.setFeatureState({ source: "prov", id: state.hover }, { hov: false });
     if (state.hover !== f.id) { state.hover = f.id; map.setFeatureState({ source: "prov", id: f.id }, { hov: true }); redrawDraped(); }
     showTip(e, f.id);
   });
   map.on("mouseleave", "prov-fill", () => { map.getCanvas().style.cursor = ""; $("tip").hidden = true;
+    if (countyState.hover !== null) { map.setFeatureState({ source: "counties", id: countyState.hover }, { hov: false }); countyState.hover = null; }
     if (state.hover !== null) { map.setFeatureState({ source: "prov", id: state.hover }, { hov: false }); redrawDraped(); } state.hover = null; });
   map.on("click", (e) => {
+    const county = countyHit(e);
+    if (county) { selectCounty(county); return; }
     const f = map.queryRenderedFeatures(e.point, { layers: ["prov-fill"] })[0];
     if (f) onClick(f.id); else if (state.sel) clearSelection();
   });
@@ -806,20 +826,28 @@ function wire(admin) {
   $("toggleSheet").onclick = () => { const c = $("controls"); const cl = c.classList.toggle("collapsed"); $("toggleSheet").textContent = cl ? "展开" : "收起"; $("toggleSheet").setAttribute("aria-expanded", String(!cl)); };
 
   const names = admin.admin_id.map((_, ai) => [ai, col("name_zh", ai) || "", (col("name", ai) || "").toLowerCase(), (col("name_en", ai) || "").toLowerCase()]);
-  $("q").oninput = () => {
+  $("q").oninput = async () => {
     const q = $("q").value.trim().toLowerCase(); const Rs = $("results"); Rs.replaceChildren(); if (q.length < 1) return;
+    const snap = state.snap;
     const qs = [...new Set([q, q.replace(/台/g, "臺"), q.replace(/臺/g, "台")])];
     const rank = (t) => { let r = 9; if (!t) return r; for (const v of qs) r = Math.min(r, t === v ? 0 : t.startsWith(v) ? 1 : t.includes(v) ? 2 : 9); return r; };
     const sd = sdNow(); const live = new Set(sd.admin_active); const hits = [];
-    for (const [ai, zh, nm, en] of names) { if (!live.has(ai)) continue; const r = Math.min(rank(zh), rank(nm), rank(en)); if (r < 9) hits.push([r + (live.has(ai) ? 0 : 5), (zh || nm).length, ai]); }
-    hits.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    for (const [ai, zh, nm, en] of names) {
+      if (!live.has(ai)) continue;
+      const r = Math.min(rank(zh), rank(nm), rank(en));
+      if (r < 9) hits.push({ rank: r, name: adminName(ai), key: "province:" + ai,
+        meta: [TIER[admin.tier[ai]][0].replace(/（.*）/, ""), col("parent_zh", ai) || col("parent", ai)].filter(Boolean).join(" · "),
+        select: () => { const sd2 = sdNow(); const k = sd2.feature.findIndex((f) => admin.feature_admin[f] === ai); if (k >= 0) selectProvince(k, true); } });
+    }
+    try { hits.push(...await countySearch(q, rank)); } catch { countyStatus("县级查询暂不可用，可重试载入县界", true); }
+    if (snap !== state.snap || $("q").value.trim().toLowerCase() !== q) return;
+    hits.sort((a, b) => a.rank - b.rank || a.name.length - b.name.length);
     const seen = new Set();
-    for (const [, , ai] of hits) {
-      const key = adminName(ai) + "|" + (col("parent", ai) || ""); if (seen.has(key)) continue; seen.add(key); if (seen.size > 8) break;
+    for (const hit of hits) {
+      if (seen.has(hit.key)) continue; seen.add(hit.key); if (seen.size > 8) break;
       const li = el("li"); const b = el("button"); b.type = "button";
-      b.append(el("span", null, adminName(ai)), el("span", "meta", [TIER[admin.tier[ai]][0].replace(/（.*）/, ""), col("parent_zh", ai) || col("parent", ai), live.has(ai) ? null : "本断面不存在"].filter(Boolean).join(" · ")));
-      b.onclick = () => { const sd2 = sdNow(); const k = sd2.feature.findIndex((f) => admin.feature_admin[f] === ai);
-        if (k >= 0) selectProvince(k, true); else { const [x, y] = admin.label[ai]; map.flyTo({ center: [x, y], zoom: Math.max(map.getZoom(), 5) }); } };
+      b.append(el("span", null, hit.name), el("span", "meta", hit.meta));
+      b.onclick = hit.select;
       li.append(b); Rs.append(li);
     }
   };

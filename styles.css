@@ -114,6 +114,9 @@ dl.kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
 .title { display: flex; align-items: center; gap: 8px; }
 .title .sw { width: 16px; height: 16px; flex: none; }
 .foot { color: var(--muted); font-size: 11.5px; margin: 0; }
+#countyStatus { margin-top: 8px; }
+#countyRetry { margin-top: 6px; padding: 4px 8px; border: 1px solid var(--rule); border-radius: 4px;
+  background: var(--sheet); color: var(--focus); font: inherit; cursor: pointer; }
 .close { position: absolute; top: 8px; right: 8px; border: 0; background: transparent; color: var(--muted); font-size: 18px; cursor: pointer; line-height: 1; }
 .tip {
   position: absolute; z-index: 4; pointer-events: none; background: var(--sheet); color: var(--ink);
