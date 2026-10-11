@@ -246,7 +246,7 @@ def export(scenario, rows, cache):
     for path in output.glob("*.bin"):
         if path.name not in live_files:
             path.unlink()
-    index = {"snapshot": scenario, "min_zoom": 6, "units": len(names), "pieces": gid,
+    index = {"snapshot": scenario, "min_zoom": 4.5, "units": len(names), "pieces": gid,
              "sources": SOURCES, "countries": [{"name": n, "count": len(u)} for n, u in sorted(units.items())],
              "regions": regions, "search": [entry for _, entry in names.values()]}
     (DATA / "counties" / f"index-{scenario}.bin").write_bytes(gzip.compress(

@@ -6,7 +6,7 @@
   <title>世界地图 · 1939 / 2026</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="vendor/maplibre-gl.css">
-  <link rel="stylesheet" href="styles.css?v=counties-1">
+  <link rel="stylesheet" href="styles.css?v=counties-2">
 </head>
 <body>
 <div class="app">
@@ -26,6 +26,16 @@
           <button class="toggle-sheet chip" id="toggleSheet" type="button" aria-expanded="true">收起</button>
         </div>
         <p class="lede" id="snapLede"></p>
+        <button type="button" class="county-action" id="countyExplore" disabled>查看县级地块示例</button>
+      </div>
+      <div class="stack county-info">
+        <p class="foot" id="countyCoverage">正在检查此年份的县级资料…</p>
+        <p class="foot" id="countyStatus" role="status">放大到省级视图显示有资料的县级 / 地区级区块</p>
+        <button type="button" class="county-action" id="countyRetry" hidden>重试载入县界</button>
+        <details class="foot">
+          <summary>查看已收录国家 / 地区</summary>
+          <p id="countyCoverageNames"></p>
+        </details>
       </div>
       <div class="stack">
         <h3>视图</h3>
@@ -52,7 +62,7 @@
         <h3>图层</h3>
         <div class="toggles">
           <label><input type="checkbox" id="tProv" checked> 省界</label>
-          <label><input type="checkbox" id="tCounties" checked> 县界 / 地区界</label>
+          <label><input type="checkbox" id="tCounties" checked> 县级 / 地区级地块</label>
           <label><input type="checkbox" id="tBorders" checked> 国界 / 控制线</label>
           <label><input type="checkbox" id="tTerrain" checked> 山体晕渲</label>
           <label><input type="checkbox" id="t3d" checked> 3D 地形</label>
@@ -62,8 +72,6 @@
           <label><input type="checkbox" id="tCities" checked> 重要城市</label>
         </div>
         <div class="city-key" id="cityKey" aria-label="城市图例"></div>
-        <p class="foot" id="countyStatus" role="status">放大后显示有资料的县级 / 地区级区块</p>
-        <button type="button" id="countyRetry" hidden>重试载入县界</button>
       </div>
       <div class="stack search">
         <h3><label for="q">查找省份 / 区县</label></h3>
@@ -78,7 +86,7 @@
   </div>
 </div>
 <script src="vendor/maplibre-gl.js"></script>
-<script src="counties.js?v=counties-1"></script>
-<script src="app.js?v=counties-1"></script>
+<script src="counties.js?v=counties-2"></script>
+<script src="app.js?v=counties-2"></script>
 </body>
 </html>

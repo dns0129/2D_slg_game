@@ -116,6 +116,10 @@ async function search(page, name, source) {
   await ready(page, "1939-09-01");
   await page.waitForFunction(() => document.getElementById("countyStatus").textContent.includes("已收录"));
   assert.equal(requests.filter((u) => /counties\/(1939-09-01|2026)\//.test(u)).length, 0, "World overview should not request county outlines");
+  await page.click("#countyExplore");
+  await page.waitForFunction(() => state.sel?.level === "county" && state.sel.county.properties.n === "Alameda" &&
+    countyState.rendered.size > 0 && !map.isMoving() && map.loaded());
+  assert((await page.locator("#countyCoverageNames").textContent()).includes("美国（3,128）"));
   await search(page, "Alameda", "historical");
   assert((await page.locator("#detail").innerText()).includes("1939-09-01"));
   await page.screenshot({ path: path.join(output, "county-1939.png") });
@@ -138,6 +142,21 @@ async function search(page, name, source) {
   await page.waitForFunction((id) => state.sel?.level === "county" && state.sel.county.id === id, point.id);
   await page.click('#tabs [data-snap="2026"]');
   await ready(page, "2026");
+  // Reproduce ordinary province navigation, which used to stop below the county threshold.
+  await page.evaluate(() => { clearSelection(); map.jumpTo({ zoom: 1.6 }); });
+  await page.fill("#q", "北京");
+  await page.locator("#results button").filter({ hasText: "北京市" }).first().click();
+  await page.waitForFunction(() => state.sel?.level === "province" && !map.isMoving() && map.loaded() &&
+    countyState.rendered.size > 0 && map.queryRenderedFeatures({ layers: ["county-line"] }).length > 0);
+  assert.equal(await page.evaluate(() => map.getZoom()), 5.5);
+  assert((await page.locator("#detail .county-province").innerText()).includes("细分区块"));
+  await page.screenshot({ path: path.join(output, "county-after-province.png") });
+  await page.locator("#detail .county-province button").click();
+  await page.waitForFunction(() => state.sel?.level === "county" && !map.isMoving() && map.loaded());
+  await page.click("#countyExplore");
+  await page.waitForFunction(() => state.sel?.level === "county" && state.sel.county.properties.n === "东城区" &&
+    !map.isMoving() && map.loaded());
+  assert((await page.locator("#countyCoverageNames").textContent()).includes("中国（2,880）"));
   await search(page, "东城区", "china");
   const beijingParent = await page.evaluate(() => state.sel.admin);
   await page.screenshot({ path: path.join(output, "county-beijing.png") });
@@ -181,6 +200,10 @@ async function search(page, name, source) {
   const mobile = await makePage(mobileContext);
   await mobile.goto(base + "/2026.html", { waitUntil: "domcontentloaded" });
   await ready(mobile, "2026");
+  assert(await mobile.locator("#controls").evaluate((e) => e.classList.contains("collapsed")));
+  await mobile.tap("#countyExplore");
+  await mobile.waitForFunction(() => state.sel?.level === "county" && state.sel.county.properties.n === "东城区" &&
+    countyState.rendered.size > 0 && !map.isMoving() && map.loaded());
   await mobile.tap("#toggleSheet");
   await search(mobile, "东城区", "china");
   await mobile.tap("#toggleSheet");
@@ -209,7 +232,7 @@ async function search(page, name, source) {
   assert.deepEqual(errors, []); assert.deepEqual(missing, []);
   assert(requests.every((u) => !/^https?:/.test(u) || u.startsWith(base)), "Map stays self-contained");
   fs.writeFileSync(path.join(output, "county-checks.json"), JSON.stringify({ checks, errors, missing }, null, 2) + "\n");
-  console.log("County checks passed: historical and modern parcels, search, picking, inherited control, mobile, date races and retry.");
+  console.log("County checks passed: province-level visibility, both example buttons, province entry, historical and modern picking, mobile, date races and retry.");
 })().catch((e) => { console.error(e); process.exitCode = 1; }).finally(async () => {
   if (browser) await browser.close(); server.kill();
 });

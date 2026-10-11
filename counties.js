@@ -2,7 +2,8 @@
 // The province parcel supplies the political unit, bloc and controller in each view.
 const countyState = { indexes: new Map(), chunks: new Map(), rendered: new Map(), ticket: 0,
   selectionTicket: 0, hover: null, painted: new Map(), error: false };
-const COUNTY_ZOOM = 6;
+// Province navigation stops at zoom 4.5 or 5.5. Detail must already be visible there.
+const COUNTY_ZOOM = 4.5;
 const countyEmpty = () => ({ type: "FeatureCollection", features: [] });
 const countyLevel = (p) => p.t === 1 ? "县级" : "地区级";
 const countyArea = (a) => a < 1 ? a.toFixed(3) + " km²" : km2(a);
@@ -40,6 +41,56 @@ function countyStatus(text, failed = false) {
   countyState.error = failed;
 }
 
+function countyCoverage(index) {
+  $("countyExplore").disabled = false;
+  $("countyCoverage").textContent = `本年份已收录 ${index.units.toLocaleString()} 个县级 / 地区级单位；全球覆盖尚不完整。`;
+  $("countyCoverageNames").textContent = index.countries.map((c) => `${c.name}（${c.count.toLocaleString()}）`).join("、") +
+    "。以上数量仅表示已有资料的单位，不表示全境齐全。";
+}
+
+async function countyExample() {
+  const snap = state.snap, ticket = ++countyState.selectionTicket;
+  try {
+    const index = await countyIndex(snap);
+    if (snap !== state.snap || ticket !== countyState.selectionTicket) return;
+    const name = snap === "2026" ? "东城区" : "Alameda";
+    const entry = index.search.find((e) => e[1] === name);
+    if (entry) await selectCountyResult(entry, index);
+  } catch {
+    if (snap === state.snap) countyStatus("县级示例暂未载入，可重试载入县界", true);
+  }
+}
+
+function countyProvinceControls(panel, province) {
+  const snap = state.snap, box = el("div", "stack county-province");
+  box.append(el("h3", null, "下级地块"));
+  const note = el("p", "foot", "正在检查县级 / 地区级资料…"); box.append(note); panel.append(box);
+  countyIndex(snap).then((index) => {
+    if (snap !== state.snap || !box.isConnected) return;
+    const region = index.regions.find((r) => r.p === province);
+    if (!region) { note.textContent = "此省目前尚无县级 / 地区级界线资料，显示省级地块。"; return; }
+    note.textContent = `已有 ${region.count.toLocaleString()} 个细分区块；省级视图中可直接点选。`;
+    const button = el("button", "county-action", "进入该省的县级地块"); button.type = "button";
+    button.onclick = async () => {
+      const ticket = ++countyState.selectionTicket;
+      try {
+        const data = await countyChunk(region);
+        if (snap !== state.snap || ticket !== countyState.selectionTicket) return;
+        const [x, y] = state.admin.label[province];
+        const distance = (f) => {
+          const [lng, lat] = f.properties.xy;
+          return ((lng - x) * Math.cos(y * Math.PI / 180)) ** 2 + (lat - y) ** 2;
+        };
+        const features = [...data.features].sort((a, b) => distance(a) - distance(b));
+        if (features[0]) await selectCounty(features[0], true);
+      } catch {
+        if (snap === state.snap) countyStatus("所选县界暂未载入，请重试载入县界", true);
+      }
+    };
+    box.append(button);
+  }).catch(() => { if (box.isConnected) note.textContent = "县级资料暂未载入，可使用左侧重试按钮。"; });
+}
+
 function countyClearRendered() {
   if (!map.getSource("counties")) return;
   if (countyState.hover !== null) $("tip").hidden = true;
@@ -53,6 +104,9 @@ function countyReset() {
   countyState.ticket++; countyState.selectionTicket++;
   countyClearRendered();
   map.getSource("county-selected-label").setData(countyEmpty());
+  $("countyExplore").disabled = true;
+  $("countyCoverage").textContent = "正在检查此年份的县级资料…";
+  $("countyCoverageNames").textContent = "";
 }
 
 function countyPaint() {
@@ -88,15 +142,16 @@ function countyViewportRegions(index) {
 async function refreshCounties() {
   if (!state.snap || !map.getSource("counties")) return;
   const snap = state.snap, ticket = ++countyState.ticket;
-  if (!$("tCounties").checked) {
-    countyClearRendered(); countyStatus("县级 / 地区级图层已关闭"); return;
-  }
   try {
     const index = await countyIndex(snap);
     if (ticket !== countyState.ticket || snap !== state.snap) return;
+    countyCoverage(index);
+    if (!$("tCounties").checked) {
+      countyClearRendered(); countyStatus("县级 / 地区级图层已关闭"); return;
+    }
     if (map.getZoom() < COUNTY_ZOOM) {
       countyClearRendered();
-      countyStatus(`放大查看县界 · 已收录 ${index.units.toLocaleString()} 个细分单位`); return;
+      countyStatus(`放大到省级视图即可看见县块，也可点“查看县级地块示例” · 已收录 ${index.units.toLocaleString()} 个单位`); return;
     }
     const regions = countyViewportRegions(index);
     if (!regions.length) {
@@ -222,13 +277,13 @@ function setupCounties() {
     paint: { "fill-color": fillColor(), "fill-opacity": ["case", ["boolean", ["feature-state", "sel"], false], .48,
       ["boolean", ["feature-state", "hov"], false], .18, 0] } }, "prov-line");
   map.addLayer({ id: "county-line", type: "line", source: "counties", minzoom: COUNTY_ZOOM,
-    paint: { "line-color": "#58675f", "line-width": ["interpolate", ["linear"], ["zoom"], 6, .4, 10, .85],
-      "line-opacity": ["interpolate", ["linear"], ["zoom"], 6, .25, 8, .65] } }, "prov-line");
+    paint: { "line-color": "#394d45", "line-width": ["interpolate", ["linear"], ["zoom"], 4.5, .65, 7, .85, 10, 1.15],
+      "line-opacity": ["interpolate", ["linear"], ["zoom"], 4.5, .65, 7, .9] } }, "prov-line");
   map.addLayer({ id: "county-selected", type: "line", source: "counties", minzoom: COUNTY_ZOOM,
     paint: { "line-color": "#914926", "line-width": ["case", ["boolean", ["feature-state", "sel"], false], 2.7,
       ["boolean", ["feature-state", "hov"], false], 1.4, 0] } });
-  map.addLayer({ id: "county-lbl", type: "symbol", source: "lbl-county", minzoom: 6.5,
-    filter: ["step", ["zoom"], [">=", ["get", "a"], 1500], 7.5, [">=", ["get", "a"], 100], 9, true],
+  map.addLayer({ id: "county-lbl", type: "symbol", source: "lbl-county", minzoom: 5.5,
+    filter: ["step", ["zoom"], [">=", ["get", "a"], 500], 6.5, [">=", ["get", "a"], 100], 8, true],
     layout: { "text-field": ["get", "n"], "text-font": ["sans"], "text-size": 10.5,
       "text-max-width": 7, "text-padding": 4, "symbol-sort-key": ["-", 0, ["get", "a"]] },
     paint: { "text-color": "#495d50", "text-halo-color": HALO, "text-halo-width": 1.3 } });
@@ -243,4 +298,5 @@ function setupCounties() {
     countyPaint(); refreshCounties();
   };
   $("countyRetry").onclick = refreshCounties;
+  $("countyExplore").onclick = countyExample;
 }

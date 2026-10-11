@@ -23,7 +23,7 @@ def main():
     for snap in manifest["scenarios"]:
         index = load(FINE / f"index-{snap}.bin")
         sd = json.loads((DATA / f"snap-{snap}.json").read_text())
-        assert index["snapshot"] == snap and index["min_zoom"] == 6
+        assert index["snapshot"] == snap and index["min_zoom"] == 4.5
         assert index["units"] == len(index["search"]) > 1000
         ids, unit_ids, searchable = set(), set(), {}
         countries = collections.defaultdict(set)

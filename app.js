@@ -476,6 +476,7 @@ function showProvince(k) {
   add("人口（估计）", `${fmt(pop)}　密度 ${Math.round(pop / Math.max(area, 1))} 人/km²`);
   add("面积", km2(area));
   D.append(dl);
+  countyProvinceControls(D, ai);
   const box = el("div", "stack"); box.append(el("h3", null, parts.length > 1 ? "各块的实际控制" : "实际控制"));
   const ul = el("ul", "list");
   for (const j of parts.sort((a, b) => sd.area[b] - sd.area[a])) {
