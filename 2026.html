@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-CN" data-scenario="2026">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>世界地图 · 1939 / 2026</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="vendor/maplibre-gl.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+  <header class="bar">
+    <div class="brand">
+      <h1>世界地图 · 1939 / 2026</h1>
+      <small>1939 与 2026 · 省级地块 · 阵营、国家与实际控制区</small>
+    </div>
+    <nav class="tabs" id="tabs" role="tablist" aria-label="地图年份"></nav>
+  </header>
+  <div class="stage">
+    <div id="map" role="region" aria-label="地图"></div>
+    <aside class="sheet controls" id="controls" aria-label="图例与图层">
+      <div class="head stack">
+        <div style="display:flex;justify-content:space-between;gap:8px;align-items:start">
+          <h2 id="snapTitle">—</h2>
+          <button class="toggle-sheet chip" id="toggleSheet" type="button" aria-expanded="true">收起</button>
+        </div>
+        <p class="lede" id="snapLede"></p>
+      </div>
+      <div class="stack">
+        <h3>视图</h3>
+        <div class="seg" role="group" aria-label="视图">
+          <button type="button" data-mode="bloc" aria-pressed="true">阵营</button>
+          <button type="button" data-mode="nation" aria-pressed="false">国家</button>
+          <button type="button" data-mode="control" aria-pressed="false">控制国</button>
+        </div>
+      </div>
+      <div class="stack">
+        <h3>底图</h3>
+        <div class="seg two" role="group" aria-label="底图">
+          <button type="button" data-base="relief" aria-pressed="true">地形</button>
+          <button type="button" data-base="white" aria-pressed="false">白色</button>
+        </div>
+      </div>
+      <div class="stack">
+        <h3 id="legendTitle">实际控制阵营 · 人口</h3>
+        <div class="legend" id="legend"></div>
+        <div class="bar-split" id="split" aria-hidden="true"></div>
+        <p class="foot" id="legendNote"></p>
+      </div>
+      <div class="stack">
+        <h3>图层</h3>
+        <div class="toggles">
+          <label><input type="checkbox" id="tProv" checked> 省界</label>
+          <label><input type="checkbox" id="tBorders" checked> 国界 / 控制线</label>
+          <label><input type="checkbox" id="tTerrain" checked> 山体晕渲</label>
+          <label><input type="checkbox" id="t3d" checked> 3D 地形</label>
+          <label><input type="checkbox" id="tHydro" checked> 河流湖泊</label>
+          <label><input type="checkbox" id="tLabels" checked> 地名</label>
+          <label><input type="checkbox" id="tApprox" checked> 近似斜线</label>
+          <label><input type="checkbox" id="tCities" checked> 重要城市</label>
+        </div>
+        <div class="city-key" id="cityKey" aria-label="城市图例"></div>
+      </div>
+      <div class="stack search">
+        <h3><label for="q">查找省份</label></h3>
+        <input id="q" type="search" placeholder="例如 京畿道、Kursk、Seine、北海道" autocomplete="off">
+        <ul class="results" id="results"></ul>
+      </div>
+      <p class="foot">点击地图先选中国家，再点击同一国家进入省级。1939 地块固定为 1939-09-01；2026 使用原项目的当今世界数据。斜线表示近似控制区，缺少省界的地区保留整个政治单元。数据来源与许可见 <a href="docs/SOURCES.md">图源说明</a>。</p>
+    </aside>
+    <aside class="sheet detail" id="detail" hidden aria-live="polite"></aside>
+    <div class="tip" id="tip" hidden></div>
+    <div class="loading" id="loading">正在载入历史省级区划…</div>
+  </div>
+</div>
+<script src="vendor/maplibre-gl.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

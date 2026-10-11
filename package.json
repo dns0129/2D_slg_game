@@ -1,0 +1,14 @@
+{
+  "name": "2d-slg-game-map",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Standalone 1939 and 2026 world maps copied from World_Map_History",
+  "scripts": {
+    "start": "python3 -m http.server 8765 --bind 127.0.0.1",
+    "test": "python3 scripts/verify_data.py && node scripts/verify_browser.cjs",
+    "test:data": "python3 scripts/verify_data.py"
+  },
+  "devDependencies": {
+    "playwright": "1.58.2"
+  }
+}

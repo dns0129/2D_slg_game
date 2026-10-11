@@ -1,63 +1,80 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-scenario="1939-09-01">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#f5f8f6">
-  <title>山河棋局 · 战略模拟</title><link rel="stylesheet" href="./styles.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>世界地图 · 1939 / 2026</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="vendor/maplibre-gl.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main id="app" class="full-map-game">
-    <section class="map-area" aria-label="战略地图">
-      <div id="map-wrap" class="map-wrap"><svg id="map" viewBox="0 0 1200 760" role="img" aria-label="可缩放的历史战略地图"></svg></div>
-    </section>
-    <header class="topbar floating-panel">
-      <div class="brand"><span class="brand-mark">山</span><div><strong>山河棋局</strong><small id="scenario-name">选择剧本</small></div></div>
-      <div class="top-actions"><button id="help-btn" class="icon-button" title="玩法说明" aria-label="玩法说明">?</button><button id="new-game-btn" class="icon-button" title="新游戏" aria-label="新游戏">＋</button></div>
-    </header>
-    <aside id="overview-panel" class="overview-panel floating-panel" aria-label="政治、经济与军事概览">
-      <div class="overview-heading"><span class="eyebrow">国家概览</span><button id="toggle-overview" class="plain-button" title="收起概览" aria-expanded="true">−</button></div>
-      <div id="overview-body" class="sidebar-scroll">
-        <h1 id="campaign-title" class="hidden">执掌山河</h1><p id="campaign-description" class="hidden"></p>
-        <section class="overview-section political-section">
-          <div id="player-card" class="player-card empty"><span>尚未选择势力</span></div>
-          <div class="section-label">政治概览 <span id="war-count">—</span></div>
-          <div id="war-overview" class="war-overview"><span class="muted">战役开始后显示交战国家</span></div>
-          <details class="faction-details"><summary>各国势力 <span id="faction-count"></span></summary><div id="faction-list" class="faction-list"></div></details>
-        </section>
-        <section class="overview-section"><div class="section-label">经济概览</div><div class="stats-grid"><div class="stat"><span>国库</span><strong id="gold-stat">—</strong></div><div class="stat"><span>每月收入</span><strong id="income-stat">—</strong></div></div></section>
-        <section class="overview-section"><div class="section-label">军事概览</div><div class="stats-grid"><div class="stat"><span>总兵力</span><strong id="army-stat">—</strong></div><div class="stat"><span>控制地块</span><strong id="province-stat">—</strong></div></div></section>
-        <details class="war-diary"><summary>最新战报</summary><div id="event-log" class="event-log"><div class="log-empty">尚未开始战役</div></div></details>
-      </div>
-    </aside>
-    <aside class="time-panel floating-panel" aria-label="当前时间">
-      <div class="time-heading"><span class="eyebrow">战役时间</span><span id="round-counter">第 1 回合</span></div>
-      <strong id="turn-label" class="current-year">等待开始</strong>
-      <span id="time-note" class="time-note">每回合推进一个月</span>
-      <button id="end-turn-btn" class="primary-button" disabled>推进一个月 <span>→</span></button>
-    </aside>
-    <div class="map-toolbar floating-panel">
-      <div class="map-search-box"><input id="map-search" type="search" placeholder="搜索历史地名…" aria-label="搜索当前剧本的历史地名" autocomplete="off"><div id="map-search-results" class="map-search-results hidden"></div></div>
-      <div class="atlas-selects"><select id="map-layer" aria-label="区划层级"><option value="auto">自动层级</option><option value="overview">国家概览</option><option value="region">州省概览</option><option value="district">省内地块</option></select><select id="map-mode" aria-label="地图显示"><option value="control">国家着色</option><option value="administration">行政底图</option></select></div>
-      <div class="map-tools"><button id="zoom-out" title="缩小">−</button><button id="zoom-in" title="放大">+</button><button id="zoom-reset" title="重置视角">⤢</button><button id="focus-selected" title="放大选中地块">⌖</button><button id="asia-full" title="浏览完整亚洲">亚洲</button></div>
+<div class="app">
+  <header class="bar">
+    <div class="brand">
+      <h1>世界地图 · 1939 / 2026</h1>
+      <small>1939 与 2026 · 省级地块 · 阵营、国家与实际控制区</small>
     </div>
-    <aside class="minimap-panel floating-panel" aria-label="小地图">
-      <div class="minimap-heading"><span class="eyebrow">战区导航</span><span>点击定位</span></div>
-      <svg id="mini-map" role="img" aria-label="小地图与当前视野范围"></svg>
-      <div class="minimap-caption"><span id="map-caption">历史地图</span><span id="mini-zoom">1×</span></div>
+    <nav class="tabs" id="tabs" role="tablist" aria-label="地图年份"></nav>
+  </header>
+  <div class="stage">
+    <div id="map" role="region" aria-label="地图"></div>
+    <aside class="sheet controls" id="controls" aria-label="图例与图层">
+      <div class="head stack">
+        <div style="display:flex;justify-content:space-between;gap:8px;align-items:start">
+          <h2 id="snapTitle">—</h2>
+          <button class="toggle-sheet chip" id="toggleSheet" type="button" aria-expanded="true">收起</button>
+        </div>
+        <p class="lede" id="snapLede"></p>
+      </div>
+      <div class="stack">
+        <h3>视图</h3>
+        <div class="seg" role="group" aria-label="视图">
+          <button type="button" data-mode="bloc" aria-pressed="true">阵营</button>
+          <button type="button" data-mode="nation" aria-pressed="false">国家</button>
+          <button type="button" data-mode="control" aria-pressed="false">控制国</button>
+        </div>
+      </div>
+      <div class="stack">
+        <h3>底图</h3>
+        <div class="seg two" role="group" aria-label="底图">
+          <button type="button" data-base="relief" aria-pressed="true">地形</button>
+          <button type="button" data-base="white" aria-pressed="false">白色</button>
+        </div>
+      </div>
+      <div class="stack">
+        <h3 id="legendTitle">实际控制阵营 · 人口</h3>
+        <div class="legend" id="legend"></div>
+        <div class="bar-split" id="split" aria-hidden="true"></div>
+        <p class="foot" id="legendNote"></p>
+      </div>
+      <div class="stack">
+        <h3>图层</h3>
+        <div class="toggles">
+          <label><input type="checkbox" id="tProv" checked> 省界</label>
+          <label><input type="checkbox" id="tBorders" checked> 国界 / 控制线</label>
+          <label><input type="checkbox" id="tTerrain" checked> 山体晕渲</label>
+          <label><input type="checkbox" id="t3d" checked> 3D 地形</label>
+          <label><input type="checkbox" id="tHydro" checked> 河流湖泊</label>
+          <label><input type="checkbox" id="tLabels" checked> 地名</label>
+          <label><input type="checkbox" id="tApprox" checked> 近似斜线</label>
+          <label><input type="checkbox" id="tCities" checked> 重要城市</label>
+        </div>
+        <div class="city-key" id="cityKey" aria-label="城市图例"></div>
+      </div>
+      <div class="stack search">
+        <h3><label for="q">查找省份</label></h3>
+        <input id="q" type="search" placeholder="例如 京畿道、Kursk、Seine、北海道" autocomplete="off">
+        <ul class="results" id="results"></ul>
+      </div>
+      <p class="foot">点击地图先选中国家，再点击同一国家进入省级。1939 地块固定为 1939-09-01；2026 使用原项目的当今世界数据。斜线表示近似控制区，缺少省界的地区保留整个政治单元。数据来源与许可见 <a href="docs/SOURCES.md">图源说明</a>。</p>
     </aside>
-    <div class="map-status floating-panel"><span id="lod-badge">概览 · 国家</span><span id="map-hint">选择剧本开始</span><span id="map-subcaption" class="hidden"></span></div>
-    <div class="map-scale"><span id="scale-bar"></span><b id="scale-label">约 500 km</b></div><div class="compass"><span>N</span><i></i></div>
-    <aside id="inspector-panel" class="inspector floating-panel hidden" aria-label="地块详细情报">
-      <div class="inspector-heading"><span class="eyebrow">地块情报</span><button id="close-inspector" class="plain-button" title="关闭地块情报" aria-label="关闭地块情报">×</button></div>
-      <div class="inspector-inner"><div id="inspector-content" class="inspector-content"></div></div>
-    </aside>
-  </main>
-  <div id="setup-overlay" class="overlay"><div class="setup-modal"><div class="setup-aside"><div class="modal-brand"><span class="brand-mark">山</span> 山河棋局</div><div class="setup-graphic"><div class="sun"></div><div class="ridge ridge-one"></div><div class="ridge ridge-two"></div><div class="ridge ridge-three"></div><div class="river-art"></div></div><div class="setup-aside-bottom">一纸版图，万里山河。<br>每一步，都将写入历史。</div></div><div class="setup-main"><div class="eyebrow">NEW CAMPAIGN / 新的征程</div><h2>选择你的时代</h2><p id="setup-intro" class="setup-intro">在两个不同的时代争夺土地、经营国库、调度军队。</p><div id="scenario-options" class="scenario-options"></div><div class="choose-row"><div><strong>选择势力</strong><span>你将亲自指挥该势力</span></div><div id="faction-options" class="faction-options"></div></div><button id="start-btn" class="primary-button start-button">开启征程 <span>↗</span></button><button id="resume-btn" class="resume-button hidden">返回当前战役</button></div></div></div>
-
-  <div id="help-overlay" class="overlay hidden"><div class="help-modal"><button id="close-help" class="close-button">×</button><div class="eyebrow">FIELD MANUAL / 玩法指南</div><h2>如何指挥你的势力</h2><div class="help-grid"><div><b>01 · 选择领土</b><p>在概览中点击州省可放大，再点击己方地块作为出发地、相邻地块作为目标。滚轮缩放，拖动任意位置浏览。目标可以是己方领土，也可以是敌方领土。</p></div><div><b>02 · 经营内政</b><p>在己方领土征兵或发展。征兵消耗国库；发展提高该地块此后的回合收入。缩放只改变显示层级。</p></div><div><b>03 · 发起行动</b><p>选定目标和兵力后，行军或进攻。山地守军拥有防御优势，胜负也受到士气与战场波动影响。</p></div><div><b>04 · 推进回合</b><p>结束回合后，各势力依次行动并结算收入。占领全部敌方领土即可统一战区。游戏会自动保存在本机浏览器。每回合推进一个月，战局按你的行动变化；历史行政底图保留剧本起始断面。</p></div></div><button id="help-done" class="primary-button">继续游戏 <span>→</span></button></div></div>
-  <div id="toast" class="toast" aria-live="polite"></div>
-  <script src="./vendor/polygon-clipping.umd.min.js"></script>
-  <script src="./maps/atlas.js"></script>
-  <script src="./maps/motion-cache.js"></script>
-  <script src="./game.js"></script>
+    <aside class="sheet detail" id="detail" hidden aria-live="polite"></aside>
+    <div class="tip" id="tip" hidden></div>
+    <div class="loading" id="loading">正在载入历史省级区划…</div>
+  </div>
+</div>
+<script src="vendor/maplibre-gl.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
