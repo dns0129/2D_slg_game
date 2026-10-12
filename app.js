@@ -33,21 +33,22 @@ const BASIS_ZH = {
 };
 // The map keeps its own palette in either page theme: a pale physical map, or a white one.
 const BASE = {
-  relief: { sea: "#d4e4ee", lake: "#b2d3ea", river: "#2b7cc4", riverInk: "#1d5f9c", shade: 0.55, sky: "#b9d0e2", horizon: "#e4edf1",
+  relief: { sea: "#d4e4ee", lake: "#b2d3ea", river: "#5294bd", riverInk: "#356b90", shade: 0.32, sky: "#b9d0e2", horizon: "#e4edf1",
     relief: { "raster-saturation": 0, "raster-contrast": 0, "raster-brightness-min": 0, "raster-brightness-max": 1 },
-    fill: { bloc: 0.52, nation: 0.6, control: 0.66 } },
-  white: { sea: "#fdfdfc", lake: "#d3e5f1", river: "#3a89cc", riverInk: "#225e94", shade: 0.3, sky: "#e8eef2", horizon: "#fbfbfa",
-    relief: { "raster-saturation": -1, "raster-contrast": -0.5, "raster-brightness-min": 0.86, "raster-brightness-max": 1 },
-    fill: { bloc: 0.42, nation: 0.5, control: 0.56 } },
+    fill: { bloc: 0.46, nation: 0.54, control: 0.6 } },
+  white: { sea: "#eaf2f6", lake: "#d3e5f1", river: "#639dc2", riverInk: "#356b90", shade: 0.3, sky: "#e8eef2", horizon: "#fbfbfa",
+    relief: { "raster-saturation": -1, "raster-contrast": -0.5, "raster-brightness-min": 0.97, "raster-brightness-max": 1 },
+    fill: { bloc: 0.42, nation: 0.54, control: 0.6 } },
 };
 const INK = "#1b2220", INK2 = "#4f5955", HALO = "rgba(250,251,248,0.92)";
+const SELECT_INK = "#cf6718";
 const LABEL_PX = 12;
 const blocName = (sd, b) => (sd.bloc_names || BLOC_ZH)[b];
 const isModern = (sd) => sd.snapshot === "2026";        // country names: the small serif lettering, the same at every zoom
 
 // outlines arrive per snapshot (data/geo-<date>.bin) and are kept by their global index: pieces cut from a
 // province (geo), province outlines (adminGeo), CShapes units (units); a snapshot's control areas stay on it (ctrlGeo)
-const state = { snap: null, mode: "bloc", base: "relief", data: {}, geo: [], adminGeo: [], units: [], loading: 0, userPitch: false, pitchEasing: false, seenPitch: null, selPainted: new Map(), selLines: {}, dropTerrain: false,
+const state = { snap: null, mode: "bloc", base: "white", data: {}, geo: [], adminGeo: [], units: [], loading: 0, userPitch: false, pitchEasing: false, seenPitch: null, selPainted: new Map(), selLines: {}, dropTerrain: false,
   admin: null, hydro: null, hydroDetail: null, sel: null, hover: null };
 const geoOf = (f) => state.geo[f] || state.adminGeo[state.admin.feature_admin[f]];  // a whole province is drawn with its outline
 const $ = (id) => document.getElementById(id);
@@ -241,7 +242,7 @@ function fillColor() {
 function fillOpacity() {
   const base = BASE[state.base].fill[state.mode];
   return ["match", ["coalesce", ["feature-state", "sel"], -1], 2, Math.min(0.97, base + 0.25), 1, Math.min(0.95, base + 0.12),
-    0, base * 0.35, base];
+    0, base * 0.58, base];
 }
 const SEL_LINES = { "ctrl-sel": "ctrl", "unit-sel": "units", "prov-sel": "admin" };
 // On the 3D terrain the map is drawn into images laid over the terrain, which a feature-state change does not
@@ -262,7 +263,7 @@ function paintSelection() {
     let v;
     if (s) {
       const inC = countryOf(sd, k) === s.country;
-      v = s.level !== "country" ? (state.admin.feature_admin[sd.feature[k]] === s.admin ? 2 : inC ? 3 : 0) : inC ? 1 : 0;
+      v = s.level === "county" ? (inC ? 3 : 0) : s.level === "province" ? (state.admin.feature_admin[sd.feature[k]] === s.admin ? 2 : inC ? 3 : 0) : inC ? 1 : 0;
     }
     if (state.selPainted.get(k) === v) continue;
     changed = true;
@@ -270,8 +271,8 @@ function paintSelection() {
     else { map.setFeatureState({ source: "prov", id: k }, { sel: v }); state.selPainted.set(k, v); }
   }
   // the outline of the selected country (control view) or political unit, and of the selected province
-  const want = { "ctrl-sel": s && ctl ? s.country : null, "unit-sel": s && !ctl && s.country < 100000 ? s.country : null,
-    "prov-sel": s && s.level !== "country" ? s.admin : null };
+  const want = { "ctrl-sel": s?.level === "country" && ctl ? s.country : null, "unit-sel": s?.level === "country" && !ctl && s.country < 100000 ? s.country : null,
+    "prov-sel": s?.level === "province" ? s.admin : null };
   for (const [layer, source] of Object.entries(SEL_LINES)) {
     const was = state.selLines[layer];
     if (was === want[layer]) continue;
@@ -493,7 +494,7 @@ function showTip(e, k) {
 function panel() {
   const D = $("detail"); D.replaceChildren(); D.hidden = false;
   const close = el("button", "close", "×"); close.type = "button"; close.setAttribute("aria-label", "关闭");
-  close.onclick = () => clearSelection(); D.append(close); return D;
+  close.onclick = () => clearSelection(); D.append(close); decorateDetail(D); return D;
 }
 const kvList = () => { const dl = el("dl", "kv"); const add = (t, v) => { if (v == null || v === "") return; dl.append(el("dt", null, t), el("dd", null, v)); }; return [dl, add]; };
 function chips(list) { const c = el("div"); c.style.cssText = "display:flex;flex-wrap:wrap;gap:6px"; for (const [t, cls] of list) c.append(el("span", "chip " + (cls || ""), t)); return c; }
@@ -599,20 +600,20 @@ function showProvince(k) {
   D.append(dl2, el("p", "foot", "来源：" + col("source", ai)));
 }
 
-function clearSelection() { countyState.selectionTicket++; state.sel = null; $("detail").hidden = true; applyPaint(); }
+function clearSelection() { countyState.selectionTicket++; state.sel = null; $("detail").hidden = true; applyPaint(); updatePresentation(); }
 function selectCountry(cid, fly, kAny) {
   countyState.selectionTicket++;
   const sd = sdNow(); if (kAny == null) kAny = piecesOf(cid)[0];
   if (kAny == null) return;
   state.sel = { level: "country", country: cid, admin: -1, piece: kAny }; applyPaint(); showCountry(cid, kAny);
   if (fly) { const bb = state.mode === "control" ? geoBounds(sd.ctrlGeo[sd.countries[cid][8]]) : piecesBounds(piecesOf(cid));
-    if (bb) map.fitBounds(bb, { padding: 60, maxZoom: 6, duration: 700 }); }
+    fitReadingBounds(bb, 6); }
 }
 function selectProvince(k, fly) {
   countyState.selectionTicket++;
   const sd = sdNow(); const ai = state.admin.feature_admin[sd.feature[k]];
   state.sel = { level: "province", country: countryOf(sd, k), admin: ai, piece: k }; applyPaint(); showProvince(k);
-  if (fly) { const [x, y] = state.admin.label[ai]; map.flyTo({ center: [x, y], zoom: Math.max(map.getZoom(), state.admin.area[ai] > 2e5 ? 4.5 : 5.5) }); }
+  if (fly) flyReadingProvince(ai);
 }
 function geoBounds(polys) {
   let x0 = 180, y0 = 90, x1 = -180, y1 = -90; let best = 0, bb = null;
@@ -670,12 +671,12 @@ async function loadSnap(snap) {
   state.snap = snap; const sd = sdNow();
   countyReset();
   $("loading").hidden = true;
-  $("q").value = ""; $("results").replaceChildren();
+  $("q").value = ""; $("results").replaceChildren(); $("searchStatus").hidden = true;
   for (const b of document.querySelectorAll("#tabs button")) {
     b.setAttribute("aria-selected", String(b.dataset.snap === snap));
     if (b.dataset.snap === snap) b.scrollIntoView({ block: "nearest", inline: "nearest" });
   }
-  $("snapTitle").textContent = isModern(sd) ? sd.title_zh : `${snap.replace(/-/g, ".")}　${sd.title_zh}`;
+  $("snapTitle").textContent = isModern(sd) ? "2026 · 当今世界" : "1939 · 历史地图";
   const n = sd.admin_active.length; const split = new Set(sd.feature.filter((f, k) => sd.split[k]).map((f) => state.admin.feature_admin[f])).size;
   const top = sd.countries.filter((c) => c[0] !== "-20").slice(0, 3).map((c) => `${c[1]} ${fmt(c[5])}`).join("、");
   $("snapLede").textContent = isModern(sd)
@@ -691,7 +692,7 @@ async function loadSnap(snap) {
   map.getSource("ctrl").setData(ctrlFeatures(sd));
   map.getSource("cities").setData(cityFeatures(sd));
   map.once("idle", () => { document.body.classList.remove("busy"); prefetchNear(snap); });
-  applyPaint(); legend(); setLabels(); setHash();
+  applyPaint(); legend(); setLabels(); setHash(); updatePresentation();
   refreshCounties();
   if (prev && prev.level === "province") { const k = sd.feature.findIndex((f) => state.admin.feature_admin[f] === prev.admin); if (k >= 0) selectProvince(k, false); }
 }
@@ -702,7 +703,7 @@ function setMode(mode) {
   const s = state.sel; state.mode = mode;
   for (const x of document.querySelectorAll("[data-mode]")) x.setAttribute("aria-pressed", String(x.dataset.mode === mode));
   state.sel = null; $("detail").hidden = true;
-  applyPaint(); legend(); setLabels(); setHash();
+  applyPaint(); legend(); setLabels(); setHash(); updatePresentation();
   if (s && s.level === "province") selectProvince(s.piece, false);
   if (s && s.level === "county") selectCounty(s.county);
 }
@@ -721,7 +722,8 @@ async function boot() {
   const [index, admin] = await Promise.all([getJSON("data/index.json"), getPacked("data/admin.bin")]);
   await Promise.race([fonts.catch(() => null), new Promise((r) => setTimeout(r, 2500))]);
   state.admin = admin;
-  const saved = store.get("2d-slg-map-base"); if (saved && BASE[saved]) state.base = saved;
+  const saved = store.get("2d-slg-map-style-v2"); if (saved && BASE[saved]) state.base = saved;
+  $("tTerrain").checked = $("t3d").checked = state.base === "relief";
   const tabs = $("tabs");
   index.snapshots = index.snapshots.filter((s) => SCENARIOS.includes(s.snapshot));
   for (const s of index.snapshots) {
@@ -729,12 +731,11 @@ async function boot() {
     b.append(el("span", "d", s.snapshot.replace(/-/g, ".")), el("span", "t", s.title_zh));
     b.onclick = () => loadSnap(s.snapshot).catch(fail); tabs.append(b);
   }
-  map = new maplibregl.Map({ container: "map", center: [60, 30], zoom: 1.6, minZoom: 1, maxZoom: 15, attributionControl: false,
+  map = new maplibregl.Map({ container: "map", center: [60, 30], zoom: 1.6, minZoom: -0.5, maxZoom: 15, attributionControl: false,
     renderWorldCopies: false, localIdeographFontFamily: "'Noto Serif SC', 'Songti SC', 'SimSun', serif", maxPitch: 65, transformCameraUpdate: cameraUpdate,
     style: { version: 8, glyphs: "glyph://{fontstack}/{range}", sources: {},
       layers: [{ id: "bg", type: "background", paint: { "background-color": BASE[state.base].sea } }] } });
   map.touchZoomRotate.disableRotation();
-  if (window.innerWidth > 760) map.setPadding({ left: 320, top: 0, right: 0, bottom: 0 });
   map.addControl(new maplibregl.NavigationControl({ showCompass: true, visualizePitch: true }), "bottom-right");
   map.addControl(new maplibregl.ScaleControl({ unit: "metric" }), "bottom-left");
   map.on("load", () => onLoad(index).catch(fail));
@@ -744,7 +745,7 @@ async function boot() {
 const R = (lo, mid, hi, rest) => ["case", ["<=", ["get", "r"], 3], lo, ["<=", ["get", "r"], 6], mid, ["<=", ["get", "r"], 8], hi, rest];
 function riverPaint() {
   return { "line-color": BASE[state.base].river,
-    "line-width": ["interpolate", ["linear"], ["zoom"], 1, R(1.0, 0.55, 0.3, 0.2), 4, R(2.2, 1.4, 0.9, 0.6), 8, R(4.2, 3.0, 2.0, 1.4)],
+    "line-width": ["interpolate", ["linear"], ["zoom"], 1, R(.8, .45, .25, .15), 4, R(1.3, .9, .6, .4), 8, R(2.2, 1.5, 1.1, .8)],
     "line-opacity": ["interpolate", ["linear"], ["zoom"], 1, R(0.95, 0.6, 0, 0), 3, R(1, 0.9, 0.55, 0), 4.5, R(1, 1, 0.9, 0.65), 6, 1] };
 }
 const RIVER_FILTER = ["all", ["==", ["get", "k"], "r"], ["!=", ["get", "c"], 1]];
@@ -777,17 +778,25 @@ function cameraUpdate(next) {
   return { pitch: autoPitchAt(next.zoom) };
 }
 // terrain on above T3D.from (where its height is still zero, so it rises from flat), off a little below.
-// It is taken off only once the map stands still: MapLibre 4.7 ends a drag or a flight on the terrain with
-// transform.recalculateZoom(map.terrain), which throws when the terrain has gone in the meantime, and the
-// exception leaves its render queue marked as running, so that the map draws and moves no more. Below
-// T3D.from its height is zero, so keeping it until then changes nothing on the screen.
+// Remove terrain in the frame after movement/gesture cleanup, whose final zoom
+// calculation still needs it. MapLibre 4.7 can leave _elevationFreeze set after a
+// pitch-only animation; that flag alone must not permanently block returning to 2D.
+let terrainDropFrame = 0;
 function update3D() {
   const z = map.getZoom(), want = $("t3d").checked && z >= T3D.from - (map.terrain ? 0.3 : 0);
-  if (want && !map.terrain) map.setTerrain({ source: "dem", exaggeration: exaggerationAt(z) });
-  else if (!want && map.terrain) {
-    if (map.isMoving() || map._elevationFreeze) { state.dropTerrain = true; return; }
+  if (want) {
     state.dropTerrain = false;
-    map.setTerrain(null);
+    if (!map.terrain) map.setTerrain({ source: "dem", exaggeration: exaggerationAt(z) });
+  }
+  else if (!want && map.terrain) {
+    state.dropTerrain = true;
+    if (map.isMoving() || terrainDropFrame) return;
+    terrainDropFrame = requestAnimationFrame(() => {
+      terrainDropFrame = 0;
+      if (map.isMoving() || map.handlers.isActive() || !state.dropTerrain || !map.terrain) return;
+      state.dropTerrain = false;
+      map.setTerrain(null); map.triggerRepaint();
+    });
   }
 }
 // back to the auto tilt, eased: after the 3D switch, or once zoomed out of 3D after tilting by hand
@@ -797,7 +806,7 @@ function easeToAutoPitch() {
   if (Math.abs(map.getPitch() - pitch) < 0.5) return;
   state.pitchEasing = true;
   map.once("moveend", () => { state.pitchEasing = false; });
-  map.easeTo({ pitch, duration: 700 });
+  map.easeTo({ pitch, duration: motionDuration(550) });
 }
 
 async function onLoad(index) {
@@ -823,26 +832,29 @@ async function onLoad(index) {
   map.addLayer({ id: "relief", type: "raster", source: "relief", paint: { "raster-resampling": "linear", "raster-fade-duration": 0 } });
   map.addLayer({ id: "prov-fill", type: "fill", source: "prov", paint: { "fill-color": fillColor(), "fill-opacity": 0.6 } });
   map.addLayer({ id: "prov-approx", type: "fill", source: "prov", filter: ["==", ["get", "a"], 1], paint: { "fill-pattern": "hatch", "fill-opacity": 0.6 } });
-  map.addLayer({ id: "shade", type: "raster", source: "shade", paint: { "raster-resampling": "linear", "raster-fade-duration": 0 } });
+  map.addLayer({ id: "shade", type: "raster", source: "shade", layout: { visibility: $("tTerrain").checked ? "visible" : "none" }, paint: { "raster-resampling": "linear", "raster-fade-duration": 0 } });
   // elevation: one source for the 3D terrain, one for the hillshade drawn from it once zoomed in past the
   // pre-drawn shading (zoom 5), which is sharper there; open sea is flat
   const dem = { type: "raster-dem", tiles: ["relief://d/{z}/{x}/{y}"], tileSize: 256, encoding: "terrarium", minzoom: 0, maxzoom: 6 };
   map.addSource("dem", dem); map.addSource("dem-shade", { ...dem });
-  map.addLayer({ id: "hillshade", type: "hillshade", source: "dem-shade", minzoom: 4.8,
+  map.addLayer({ id: "hillshade", type: "hillshade", source: "dem-shade", minzoom: 4.8, layout: { visibility: $("tTerrain").checked ? "visible" : "none" },
     paint: { "hillshade-illumination-direction": 315, "hillshade-illumination-anchor": "map", "hillshade-exaggeration": 0.6,
       "hillshade-accent-color": "rgba(0,0,0,0)" } });
   map.addLayer({ id: "hydro-fill", type: "fill", source: "hydro", filter: ["==", ["get", "k"], "l"], paint: { "fill-color": BASE[state.base].lake } });
   map.addLayer({ id: "hydro-line", type: "line", source: "hydro", filter: RIVER_FILTER, layout: { "line-cap": "round", "line-join": "round" }, paint: riverPaint() });
-  map.addLayer({ id: "prov-line", type: "line", source: "admin", paint: { "line-color": INK2,
-    "line-opacity": ["interpolate", ["linear"], ["zoom"], 1.5, 0.12, 3, 0.3, 6, 0.5],
-    "line-width": ["interpolate", ["linear"], ["zoom"], 2, 0.3, 7, 1.0] } });
-  map.addLayer({ id: "unit-line", type: "line", source: "units", paint: { "line-color": INK, "line-width": ["interpolate", ["linear"], ["zoom"], 1, 0.5, 6, 1.4], "line-opacity": 0.75 } });
-  map.addLayer({ id: "ctrl-line", type: "line", source: "ctrl", layout: { "line-join": "round" }, paint: { "line-color": "#1f2326", "line-width": ["interpolate", ["linear"], ["zoom"], 1, 0.6, 4, 1.3, 7, 2.2], "line-opacity": 0.8 } });
-  map.addLayer({ id: "ctrl-sel", type: "line", source: "ctrl", paint: { "line-color": INK, "line-width": 2.6,
+  map.addLayer({ id: "prov-line", type: "line", source: "admin", paint: { "line-color": "#66778a",
+    "line-opacity": ["interpolate", ["linear"], ["zoom"], 1.5, .12, 3.5, .4, 6, .75],
+    "line-width": ["interpolate", ["linear"], ["zoom"], 2, .3, 4, .9, 7, 1.5] } });
+  map.addLayer({ id: "unit-line", type: "line", source: "units", layout: { "line-join": "round" }, paint: { "line-color": "#273645", "line-width": ["interpolate", ["linear"], ["zoom"], 1, .8, 3, 1.3, 6, 2.2, 9, 2.6], "line-opacity": .92 } });
+  map.addLayer({ id: "ctrl-line", type: "line", source: "ctrl", layout: { "line-join": "round" }, paint: { "line-color": "#273645", "line-width": ["interpolate", ["linear"], ["zoom"], 1, .8, 3, 1.3, 6, 2.2, 9, 2.6], "line-opacity": .92 } });
+  for (const [id, source] of Object.entries(SEL_LINES)) map.addLayer({ id: id + "-halo", type: "line", source,
+    layout: { "line-join": "round" }, paint: { "line-color": HALO, "line-width": 5.5,
+      "line-opacity": ["case", ["boolean", ["feature-state", "sel"], false], 1, 0] } });
+  map.addLayer({ id: "ctrl-sel", type: "line", source: "ctrl", paint: { "line-color": SELECT_INK, "line-width": 3,
     "line-opacity": ["case", ["boolean", ["feature-state", "sel"], false], 1, 0] } });
-  map.addLayer({ id: "unit-sel", type: "line", source: "units", paint: { "line-color": INK, "line-width": 2.6,
+  map.addLayer({ id: "unit-sel", type: "line", source: "units", paint: { "line-color": SELECT_INK, "line-width": 3,
     "line-opacity": ["case", ["boolean", ["feature-state", "sel"], false], 1, 0] } });
-  map.addLayer({ id: "prov-sel", type: "line", source: "admin", paint: { "line-color": INK, "line-width": 2.4,
+  map.addLayer({ id: "prov-sel", type: "line", source: "admin", paint: { "line-color": SELECT_INK, "line-width": 3,
     "line-opacity": ["case", ["boolean", ["feature-state", "sel"], false], 1, 0] } });
   map.addLayer({ id: "prov-hover", type: "line", source: "prov", paint: { "line-color": INK, "line-width": ["case", ["boolean", ["feature-state", "hov"], false], 1.4, 0] } });
   map.addLayer(riverLabel("river-lbl-a", "hydro", 3, 0, 4));
@@ -863,11 +875,13 @@ async function onLoad(index) {
   map.addLayer({ id: "country-lbl", type: "symbol", source: "lbl-country", filter: fitsFilter(),
     layout: { "text-field": ["get", "n"], "text-font": ["sans Medium"], "text-size": LABEL_PX, "text-letter-spacing": 0.04,
       "text-max-width": 30, "symbol-sort-key": ["get", "s"], "text-padding": 4 },
-    paint: { "text-color": INK, "text-halo-color": HALO, "text-halo-width": 1.5 } });
+    paint: { "text-color": INK, "text-halo-color": HALO, "text-halo-width": 1.5,
+      "text-opacity": ["interpolate", ["linear"], ["zoom"], 5.5, 1, 7.5, 0] } });
   const [start, view] = (location.hash || "").slice(1).split("/");
   if (MODES.includes(view)) { state.mode = view; for (const x of document.querySelectorAll("[data-mode]")) x.setAttribute("aria-pressed", String(x.dataset.mode === view)); }
   applyBase();
   await loadSnap(index.snapshots.some((s) => s.snapshot === start) ? start : DEFAULT_SNAPSHOT);
+  worldView(0);
   await new Promise((r) => map.once("idle", r));
   $("loading").hidden = true;
   getPacked("data/hydro.bin").then((h) => { state.hydro = h; map.getSource("hydro").setData(h); }).catch((e) => console.warn(e));
@@ -907,17 +921,16 @@ function wire(admin) {
   });
 
   for (const b of document.querySelectorAll("[data-mode]")) b.onclick = () => setMode(b.dataset.mode);
-  for (const b of document.querySelectorAll("[data-base]")) b.onclick = () => { state.base = b.dataset.base; store.set("2d-slg-map-base", state.base); applyBase(); };
+  for (const b of document.querySelectorAll("[data-base]")) b.onclick = () => setMapStyle(b.dataset.base);
   const vis = (id, layers) => $(id).onchange = () => layers.forEach((l) => map.getLayer(l) && map.setLayoutProperty(l, "visibility", $(id).checked ? "visible" : "none"));
   vis("tProv", ["prov-line"]); vis("tTerrain", ["shade", "hillshade"]); vis("tCities", ["city"]);
   $("tHydro").onchange = () => { for (const l of ["hydro-fill", "hydro-line", "hydro2-fill", "hydro2-line"]) if (map.getLayer(l)) map.setLayoutProperty(l, "visibility", $("tHydro").checked ? "visible" : "none"); setLabels(); };
   $("tBorders").onchange = applyPaint; $("tApprox").onchange = applyPaint; $("tLabels").onchange = setLabels;
-  if (window.innerWidth <= 760) { $("controls").classList.add("collapsed"); $("toggleSheet").textContent = "展开"; $("toggleSheet").setAttribute("aria-expanded", "false"); }
-  $("toggleSheet").onclick = () => { const c = $("controls"); const cl = c.classList.toggle("collapsed"); $("toggleSheet").textContent = cl ? "展开" : "收起"; $("toggleSheet").setAttribute("aria-expanded", String(!cl)); };
+  wirePresentation();
 
   const names = admin.admin_id.map((_, ai) => [ai, col("name_zh", ai) || "", (col("name", ai) || "").toLowerCase(), (col("name_en", ai) || "").toLowerCase()]);
   $("q").oninput = async () => {
-    const q = $("q").value.trim().toLowerCase(); const Rs = $("results"); Rs.replaceChildren(); if (q.length < 1) return;
+    const q = $("q").value.trim().toLowerCase(); const Rs = $("results"); Rs.replaceChildren(); $("searchStatus").hidden = true; if (q.length < 1) return;
     const snap = state.snap;
     const qs = [...new Set([q, q.replace(/台/g, "臺"), q.replace(/臺/g, "台")])];
     const rank = (t) => { let r = 9; if (!t) return r; for (const v of qs) r = Math.min(r, t === v ? 0 : t.startsWith(v) ? 1 : t.includes(v) ? 2 : 9); return r; };
@@ -940,6 +953,8 @@ function wire(admin) {
       b.onclick = hit.select;
       li.append(b); Rs.append(li);
     }
+    $("searchStatus").hidden = seen.size > 0;
+    $("searchStatus").textContent = "未找到匹配区划，请尝试其他名称；县级资料尚未覆盖全球。";
   };
 }
 

@@ -6,7 +6,7 @@
   <title>世界地图 · 1939 / 2026</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="vendor/maplibre-gl.css">
-  <link rel="stylesheet" href="styles.css?v=counties-2">
+  <link rel="stylesheet" href="styles.css?v=readability-1">
 </head>
 <body>
 <div class="app">
@@ -19,66 +19,93 @@
   </header>
   <div class="stage">
     <div id="map" role="region" aria-label="地图"></div>
-    <aside class="sheet controls" id="controls" aria-label="图例与图层">
+    <div class="map-tools" role="group" aria-label="地图快捷操作">
+      <button type="button" id="worldView" title="返回世界视图">返回世界</button>
+      <button type="button" id="locateSelection" disabled title="将选中的区块完整显示在地图中">定位选中</button>
+      <button type="button" id="focusMap" aria-pressed="false" title="隐藏或显示信息面板">专注地图</button>
+    </div>
+    <aside class="sheet controls" id="controls" aria-label="搜索、图例与图层">
       <div class="head stack">
-        <div style="display:flex;justify-content:space-between;gap:8px;align-items:start">
+        <div class="sheet-heading">
           <h2 id="snapTitle">—</h2>
-          <button class="toggle-sheet chip" id="toggleSheet" type="button" aria-expanded="true">收起</button>
+          <button class="toggle-sheet chip" id="toggleSheet" type="button" aria-expanded="true" aria-controls="controlBody">收起</button>
         </div>
-        <p class="lede" id="snapLede"></p>
         <button type="button" class="county-action" id="countyExplore" disabled>查看县级地块示例</button>
       </div>
-      <div class="stack county-info">
-        <p class="foot" id="countyCoverage">正在检查此年份的县级资料…</p>
-        <p class="foot" id="countyStatus" role="status">放大到省级视图显示有资料的县级 / 地区级区块</p>
-        <button type="button" class="county-action" id="countyRetry" hidden>重试载入县界</button>
-        <details class="foot">
-          <summary>查看已收录国家 / 地区</summary>
-          <p id="countyCoverageNames"></p>
+      <div class="control-body stack" id="controlBody">
+        <div class="stack search">
+          <h3><label for="q">查找省份 / 区县</label></h3>
+          <input id="q" type="search" placeholder="东城区、Alameda、北海道…" autocomplete="off" aria-controls="results">
+          <ul class="results" id="results"></ul>
+          <p class="foot" id="searchStatus" role="status" hidden></p>
+        </div>
+        <div class="stack">
+          <h3>地图着色</h3>
+          <div class="seg" role="group" aria-label="视图">
+            <button type="button" data-mode="bloc" aria-pressed="true">阵营</button>
+            <button type="button" data-mode="nation" aria-pressed="false">法理国家</button>
+            <button type="button" data-mode="control" aria-pressed="false">控制国</button>
+          </div>
+          <div class="color-key" id="colorKey" aria-label="阵营颜色图例"></div>
+        </div>
+        <div class="stack">
+          <h3>地图样式</h3>
+          <div class="seg two" role="group" aria-label="底图">
+            <button type="button" data-base="white" aria-pressed="true">平面阅读</button>
+            <button type="button" data-base="relief" aria-pressed="false">地形探索</button>
+          </div>
+        </div>
+        <div class="boundary-key stack" aria-label="区块边界图例">
+          <div class="view-context"><b id="zoomLevel">世界视图</b><span id="viewContext">阵营颜色 · 法理国界</span></div>
+          <div class="boundary-samples">
+            <span><i class="line-country"></i><span id="borderKey">国界</span></span>
+            <span><i class="line-province"></i>省界</span>
+            <span><i class="line-county"></i>县界</span>
+            <span><i class="line-selected"></i>选中</span>
+          </div>
+        </div>
+        <div class="stack county-info">
+          <p class="foot" id="countyStatus" role="status">放大显示有资料的县级 / 地区级区块</p>
+          <button type="button" class="county-action" id="countyRetry" hidden>重试载入县界</button>
+        </div>
+        <div class="stack">
+          <h3>显示图层</h3>
+          <div class="toggles">
+            <label><input type="checkbox" id="tBorders" checked> 国界 / 控制线</label>
+            <label><input type="checkbox" id="tProv" checked> 省界</label>
+            <label><input type="checkbox" id="tCounties" checked> 县级 / 地区级</label>
+            <label><input type="checkbox" id="tLabels" checked> 地名</label>
+            <label><input type="checkbox" id="tHydro" checked> 河流湖泊</label>
+            <label><input type="checkbox" id="tCities" checked> 重要城市</label>
+            <label><input type="checkbox" id="tTerrain"> 山体晕渲</label>
+            <label><input type="checkbox" id="t3d"> 3D 地形</label>
+            <label><input type="checkbox" id="tApprox" checked> 近似控制斜线</label>
+          </div>
+        </div>
+        <details class="fold">
+          <summary>颜色与城市图例</summary>
+          <div class="stack">
+            <h3 id="legendTitle">实际控制阵营 · 人口</h3>
+            <div class="legend" id="legend"></div>
+            <div class="bar-split" id="split" aria-hidden="true"></div>
+            <p class="foot" id="legendNote"></p>
+            <div class="city-key" id="cityKey" aria-label="城市图例"></div>
+          </div>
+        </details>
+        <details class="fold county-info">
+          <summary>数据年份与县界覆盖</summary>
+          <div class="stack">
+            <p class="lede" id="snapLede"></p>
+            <p class="foot" id="countyCoverage">正在检查此年份的县级资料…</p>
+            <p class="foot" id="countyCoverageNames"></p>
+            <p class="foot">县级资料按真实界线逐步补充，全球覆盖尚不完整。资料年份见区块详情；缺少资料的地区保留省级地块。</p>
+          </div>
+        </details>
+        <details class="fold">
+          <summary>操作与图源说明</summary>
+          <p class="foot">滚轮或双指缩放，拖动平移。点击地图先选中国家，再点同一国家进入省级；放大后直接点选县级区块。1939 固定为 1939-09-01；2026 沿用原项目的当今世界数据。橙线突出当前选中区块，斜线表示近似控制区。数据来源与许可见 <a href="docs/SOURCES.md">图源说明</a>。</p>
         </details>
       </div>
-      <div class="stack">
-        <h3>视图</h3>
-        <div class="seg" role="group" aria-label="视图">
-          <button type="button" data-mode="bloc" aria-pressed="true">阵营</button>
-          <button type="button" data-mode="nation" aria-pressed="false">国家</button>
-          <button type="button" data-mode="control" aria-pressed="false">控制国</button>
-        </div>
-      </div>
-      <div class="stack">
-        <h3>底图</h3>
-        <div class="seg two" role="group" aria-label="底图">
-          <button type="button" data-base="relief" aria-pressed="true">地形</button>
-          <button type="button" data-base="white" aria-pressed="false">白色</button>
-        </div>
-      </div>
-      <div class="stack">
-        <h3 id="legendTitle">实际控制阵营 · 人口</h3>
-        <div class="legend" id="legend"></div>
-        <div class="bar-split" id="split" aria-hidden="true"></div>
-        <p class="foot" id="legendNote"></p>
-      </div>
-      <div class="stack">
-        <h3>图层</h3>
-        <div class="toggles">
-          <label><input type="checkbox" id="tProv" checked> 省界</label>
-          <label><input type="checkbox" id="tCounties" checked> 县级 / 地区级地块</label>
-          <label><input type="checkbox" id="tBorders" checked> 国界 / 控制线</label>
-          <label><input type="checkbox" id="tTerrain" checked> 山体晕渲</label>
-          <label><input type="checkbox" id="t3d" checked> 3D 地形</label>
-          <label><input type="checkbox" id="tHydro" checked> 河流湖泊</label>
-          <label><input type="checkbox" id="tLabels" checked> 地名</label>
-          <label><input type="checkbox" id="tApprox" checked> 近似斜线</label>
-          <label><input type="checkbox" id="tCities" checked> 重要城市</label>
-        </div>
-        <div class="city-key" id="cityKey" aria-label="城市图例"></div>
-      </div>
-      <div class="stack search">
-        <h3><label for="q">查找省份 / 区县</label></h3>
-        <input id="q" type="search" placeholder="例如 东城区、Los Angeles、北海道" autocomplete="off">
-        <ul class="results" id="results"></ul>
-      </div>
-      <p class="foot">点击地图先选中国家，再点击同一国家进入省级；放大后可直接点选县级 / 地区级区块。1939 地块固定为 1939-09-01；2026 使用原项目的当今世界数据。细分区块按真实界线资料逐步补充，资料年份见详情；缺少细分资料的地区保留省级。斜线表示近似控制区。数据来源与许可见 <a href="docs/SOURCES.md">图源说明</a>。</p>
     </aside>
     <aside class="sheet detail" id="detail" hidden aria-live="polite"></aside>
     <div class="tip" id="tip" hidden></div>
@@ -86,7 +113,8 @@
   </div>
 </div>
 <script src="vendor/maplibre-gl.js"></script>
-<script src="counties.js?v=zoom-1"></script>
-<script src="app.js?v=zoom-1"></script>
+<script src="counties.js?v=readability-1"></script>
+<script src="map-ui.js?v=readability-1"></script>
+<script src="app.js?v=readability-1"></script>
 </body>
 </html>

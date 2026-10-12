@@ -104,7 +104,7 @@ function countyClearRendered() {
   countyState.sourceSnap = null; countyState.displaySnap = null;
   map.removeFeatureState({ source: "counties" });
   map.getSource("counties").setData(countyEmpty());
-  for (const layer of ["county-fill", "county-line", "county-selected", "county-lbl", "county-selected-label"])
+  for (const layer of ["county-fill", "county-line", "county-selected-halo", "county-selected", "county-lbl", "county-selected-label"])
     if (map.getLayoutProperty(layer, "visibility") !== "none") map.setLayoutProperty(layer, "visibility", "none");
   redrawDraped();
 }
@@ -129,7 +129,7 @@ function countyPaint() {
     }
   };
   const on = $("tCounties").checked && countyState.displaySnap === state.snap;
-  for (const layer of ["county-fill", "county-line", "county-selected"])
+  for (const layer of ["county-fill", "county-line", "county-selected-halo", "county-selected"])
     visibility(layer, on ? "visible" : "none");
   visibility("county-lbl", on && $("tLabels").checked ? "visible" : "none");
   visibility("county-selected-label", on && $("tLabels").checked ? "visible" : "none");
@@ -263,7 +263,7 @@ async function selectCounty(f, fly = false) {
   state.sel = { level: "county", country: countryOf(sdNow(), k), admin: f.properties.p, piece: k, county: f };
   $("tCounties").checked = true;
   applyPaint(); showCounty(f, index);
-  if (fly) map.fitBounds(geoBounds(f.geometry.coordinates), { padding: window.innerWidth <= 760 ? 70 : 80, maxZoom: 12, duration: 650 });
+  if (fly) fitReadingBounds(geoBounds(f.geometry.coordinates), 12);
   else countyPaint();
 }
 
@@ -320,22 +320,26 @@ function setupCounties() {
       ["boolean", ["feature-state", "hov"], false], .18, 0] } }, "prov-line");
   map.addLayer({ id: "county-line", type: "line", source: "counties", minzoom: COUNTY_ZOOM,
     filter: ["==", ["geometry-type"], "Polygon"],
-    paint: { "line-color": "#394d45", "line-width": ["interpolate", ["linear"], ["zoom"], 4.5, .65, 7, .85, 10, 1.15],
-      "line-opacity": ["interpolate", ["linear"], ["zoom"], 4.5, .65, 7, .9] } }, "prov-line");
+    paint: { "line-color": "#52687a", "line-width": ["interpolate", ["linear"], ["zoom"], 4.5, .55, 7, .72, 10, .95],
+      "line-opacity": ["interpolate", ["linear"], ["zoom"], 4.5, .62, 7, .78] } }, "prov-line");
+  map.addLayer({ id: "county-selected-halo", type: "line", source: "counties", minzoom: COUNTY_ZOOM,
+    filter: ["==", ["geometry-type"], "Polygon"], layout: { "line-join": "round" },
+    paint: { "line-color": HALO, "line-width": 5.5,
+      "line-opacity": ["case", ["boolean", ["feature-state", "sel"], false], 1, 0] } });
   map.addLayer({ id: "county-selected", type: "line", source: "counties", minzoom: COUNTY_ZOOM,
     filter: ["==", ["geometry-type"], "Polygon"],
-    paint: { "line-color": "#914926", "line-width": ["case", ["boolean", ["feature-state", "sel"], false], 2.7,
+    paint: { "line-color": SELECT_INK, "line-width": ["case", ["boolean", ["feature-state", "sel"], false], 3,
       ["boolean", ["feature-state", "hov"], false], 1.4, 0] } });
   map.addLayer({ id: "county-lbl", type: "symbol", source: "counties", minzoom: 5.5,
     filter: ["all", ["==", ["geometry-type"], "Point"],
       ["step", ["zoom"], [">=", ["get", "a"], 500], 6.5, [">=", ["get", "a"], 100], 8, true]],
-    layout: { "text-field": ["get", "n"], "text-font": ["sans"], "text-size": 10.5,
-      "text-max-width": 7, "text-padding": 4, "symbol-sort-key": ["-", 0, ["get", "a"]] },
-    paint: { "text-color": "#495d50", "text-halo-color": HALO, "text-halo-width": 1.3 } });
+    layout: { "text-field": ["get", "n"], "text-font": ["sans"], "text-size": 11,
+      "text-max-width": 7, "text-padding": 6, "symbol-sort-key": ["-", 0, ["get", "a"]] },
+    paint: { "text-color": "#425969", "text-halo-color": HALO, "text-halo-width": 1.3 } });
   map.addLayer({ id: "county-selected-label", type: "symbol", source: "county-selected-label", minzoom: COUNTY_ZOOM,
     layout: { "text-field": ["get", "n"], "text-font": ["sans"], "text-size": 12,
       "text-allow-overlap": true, "text-ignore-placement": true },
-    paint: { "text-color": "#914926", "text-halo-color": HALO, "text-halo-width": 1.6 } });
+    paint: { "text-color": "#aa4c0e", "text-halo-color": HALO, "text-halo-width": 1.8 } });
   map.on("sourcedata", () => {
     // Cached county data can finish before the new province/control outlines.
     // Reveal a new year only after the political map and its labels are ready too.
@@ -346,6 +350,7 @@ function setupCounties() {
   });
   map.on("moveend", refreshCounties);
   $("tCounties").onchange = () => {
+    updatePresentation();
     countyState.selectionTicket++;
     if (!$("tCounties").checked && state.sel?.level === "county") selectProvince(state.sel.piece, false);
     countyPaint(); refreshCounties();

@@ -64,8 +64,8 @@ async function inspect(page, key, pieces) {
     await page.goto(base, { waitUntil: "domcontentloaded" });
     await inspect(page, "1939-09-01", 1350);
     await page.screenshot({ path: path.join(output, "1939.png") });
-    // Keep interaction checks planar on CI's software GPU; terrain starts enabled.
-    assert.equal(await page.isChecked("#t3d"), true);
+    // Boundary reading starts in 2D; terrain remains available as a separate style.
+    assert.equal(await page.isChecked("#t3d"), false);
     await page.uncheck("#t3d");
     for (const mode of ["nation", "control", "bloc"]) {
       console.log(`Checking view ${mode}`);
