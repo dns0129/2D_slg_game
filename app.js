@@ -114,15 +114,47 @@ function flatTile() {
   if (!flatDem) { const c = canvas256(); const g = c.getContext("2d"); g.fillStyle = "rgb(128,0,0)"; g.fillRect(0, 0, 256, 256); flatDem = toPng(c); }
   return flatDem;
 }
+// The DEM and hillshade sources ask for the same tiles. Share PNG work, and retain
+// a bounded copy for zooming back; a returned buffer may be transferred to a worker.
+const reliefTiles = new Map();
+let reliefTileBytes = 0;
+function trimReliefTiles() {
+  while (reliefTiles.size > 128 || reliefTileBytes > 12 * 1024 * 1024) {
+    const key = reliefTiles.keys().next().value;
+    reliefTileBytes -= reliefTiles.get(key).bytes; reliefTiles.delete(key);
+  }
+}
+async function encodeReliefTile(url) {
+  const [, set, z, x, y] = /^relief:\/\/(\w)\/(\d+)\/(\d+)\/(\d+)/.exec(url).map((v, i) => i > 1 ? +v : v);
+  const per = 8, i = Math.floor(x / per), j = Math.floor(y / per);
+  let bmp;
+  try { bmp = await sheet(`${set}${z}_${i}_${j}`); } catch (e) { if (set === "d") return flatTile(); throw e; }
+  const c = canvas256(), g = c.getContext("2d"); g.imageSmoothingEnabled = false;
+  g.drawImage(bmp, (x - i * per) * 256, (y - j * per) * 256, 256, 256, 0, 0, 256, 256);
+  return toPng(c);
+}
+async function reliefTile(url) {
+  let entry = reliefTiles.get(url);
+  if (entry) { reliefTiles.delete(url); reliefTiles.set(url, entry); }
+  else {
+    entry = { bytes: 0, promise: null };
+    entry.promise = encodeReliefTile(url).then((data) => {
+      if (reliefTiles.get(url) === entry) { entry.bytes = data.byteLength; reliefTileBytes += entry.bytes; trimReliefTiles(); }
+      return data;
+    }, (error) => {
+      if (reliefTiles.get(url) === entry) reliefTiles.delete(url);
+      throw error;
+    });
+    reliefTiles.set(url, entry); trimReliefTiles();
+  }
+  return (await entry.promise).slice(0);
+}
 function registerProtocols() {
-  maplibregl.addProtocol("relief", async (params) => {
-    const [, set, z, x, y] = /^relief:\/\/(\w)\/(\d+)\/(\d+)\/(\d+)/.exec(params.url).map((v, i) => i > 1 ? +v : v);
-    const per = 8, i = Math.floor(x / per), j = Math.floor(y / per);
-    let bmp;
-    try { bmp = await sheet(`${set}${z}_${i}_${j}`); } catch (e) { if (set === "d") return { data: await flatTile() }; throw e; }
-    const c = canvas256(); const g = c.getContext("2d"); g.imageSmoothingEnabled = false;
-    g.drawImage(bmp, (x - i * per) * 256, (y - j * per) * 256, 256, 256, 0, 0, 256, 256);
-    return { data: await toPng(c) };
+  maplibregl.addProtocol("relief", async (params, controller) => {
+    if (controller?.signal.aborted) throw new DOMException("Tile request aborted", "AbortError");
+    const data = await reliefTile(params.url);
+    if (controller?.signal.aborted) throw new DOMException("Tile request aborted", "AbortError");
+    return { data };
   });
   // Chinese characters are drawn by the browser itself (localIdeographFontFamily); Latin and
   // Cyrillic province names use the few glyph ranges shipped in data/glyphs/sans
@@ -152,7 +184,7 @@ function buildFeatures(sd) {
     const f = sd.feature[k]; const ai = state.admin.feature_admin[f]; const ci = sd.country[k];
     const contested = sd.countries[ci][0] === "-20";
     feats[k] = { type: "Feature", id: k, geometry: { type: "MultiPolygon", coordinates: geoOf(f) },
-      properties: { b: sd.bloc[k], a: sd.conf[k], t: state.admin.tier[ai], p: ai, c: ci, u: unitKey(sd, k),
+      properties: { s: sd.snapshot, b: sd.bloc[k], a: sd.conf[k], t: state.admin.tier[ai], p: ai, c: ci, u: unitKey(sd, k),
         h: contested ? 2 : sd.conf[k], col: sd.countries[ci][3], nc: sd.nations[sd.nation[k]][3] } };
   }
   return { type: "FeatureCollection", features: feats };
@@ -214,7 +246,14 @@ function fillOpacity() {
 const SEL_LINES = { "ctrl-sel": "ctrl", "unit-sel": "units", "prov-sel": "admin" };
 // On the 3D terrain the map is drawn into images laid over the terrain, which a feature-state change does not
 // redraw by itself (MapLibre 4.7): drop them, so that the next frame draws them again.
-function redrawDraped() { if (map.terrain) { map.terrain.sourceCache.freeRtt(); map.triggerRepaint(); } }
+let drapedRedrawFrame = 0;
+function redrawDraped() {
+  if (!map.terrain || drapedRedrawFrame) return;
+  drapedRedrawFrame = requestAnimationFrame(() => {
+    drapedRedrawFrame = 0;
+    if (map.terrain) { map.terrain.sourceCache.freeRtt(); map.triggerRepaint(); }
+  });
+}
 function paintSelection() {
   const s = state.sel, sd = sdNow(), ctl = state.mode === "control";
   if (!sd) return;
@@ -318,7 +357,7 @@ function cityIcon(kind) {
 const CITY_ICONS = { cap: "首都", seat: "首府 / 政府驻地", port: "港口", ind: "工业城市", city: "其他重要城市" };
 const cityIconOf = (f) => f & 1 ? "ic-cap" : f & 2 ? "ic-seat" : f & 8 ? "ic-port" : f & 4 ? "ic-ind" : "ic-city";
 const cityFeatures = (sd) => fc((sd.cities || []).map(([n, x, y, f, r], i) => ({ type: "Feature", id: i,
-  geometry: { type: "Point", coordinates: [x, y] }, properties: { n: halfwidth(n), f, r, i, ic: cityIconOf(f), k: r * 10 - (f & 1 ? 5 : f & 2 ? 3 : 0) } })));
+  geometry: { type: "Point", coordinates: [x, y] }, properties: { s: sd.snapshot, n: halfwidth(n), f, r, i, ic: cityIconOf(f), k: r * 10 - (f & 1 ? 5 : f & 2 ? 3 : 0) } })));
 function showCityTip(e, i) {
   const [n, , , f, , role, note, pop] = sdNow().cities[i]; const tip = $("tip"); tip.replaceChildren();
   tip.append(el("b", null, n));
@@ -327,8 +366,7 @@ function showCityTip(e, i) {
   if (kinds) tip.append(el("div", null, kinds));
   if (note) tip.append(el("div", null, note));
   if (pop) tip.append(el("span", "num", `城市人口约 ${fmt(pop)}（Natural Earth）`));
-  tip.hidden = false; const r = map.getContainer().getBoundingClientRect();
-  tip.style.left = Math.min(e.point.x + 14, r.width - 270) + "px"; tip.style.top = (e.point.y + 14) + "px";
+  moveTip(e);
 }
 
 // ------------------------------------------------------------------ legend
@@ -375,6 +413,70 @@ function legend() {
 
 // ------------------------------------------------------------------ hover and detail
 let map;
+let hoverFrame = 0, hoverEvent = null;
+function moveTip(e) {
+  const tip = $("tip"), r = map.getContainer().getBoundingClientRect(); tip.hidden = false;
+  tip.style.left = Math.max(4, Math.min(e.point.x + 14, r.width - 270)) + "px";
+  tip.style.top = Math.max(4, Math.min(e.point.y + 14, r.height - tip.offsetHeight - 4)) + "px";
+}
+
+function clearMapHover() {
+  if (hoverFrame) cancelAnimationFrame(hoverFrame);
+  hoverFrame = 0; hoverEvent = null;
+  let changed = false;
+  if (state.hover !== null) {
+    map.removeFeatureState({ source: "prov", id: state.hover }, "hov"); state.hover = null; changed = true;
+  }
+  if (countyState.hover !== null) {
+    map.removeFeatureState({ source: "counties", id: countyState.hover }, "hov"); countyState.hover = null; changed = true;
+  }
+  state.tipKey = null; $("tip").hidden = true; map.getCanvas().style.cursor = "";
+  if (changed) redrawDraped();
+}
+
+function paintMapHover(e) {
+  if (!state.snap || !map.getLayer("county-fill")) return;
+  const hits = map.queryRenderedFeatures(e.point, { layers: ["city", "county-fill", "prov-fill"] });
+  const city = hits.find((f) => f.layer.id === "city" && f.properties.s === state.snap);
+  const county = !city && $("tCounties").checked && map.getZoom() >= COUNTY_ZOOM ?
+    countyRenderedHit(hits.find((f) => f.layer.id === "county-fill")) : null;
+  const province = !city && !county && hits.find((f) => f.layer.id === "prov-fill" && f.properties.s === state.snap);
+  const provinceId = province ? province.id : null, countyId = county ? county.id : null;
+  let changed = false;
+  if (state.hover !== provinceId) {
+    if (state.hover !== null) map.removeFeatureState({ source: "prov", id: state.hover }, "hov");
+    if (provinceId !== null) map.setFeatureState({ source: "prov", id: provinceId }, { hov: true });
+    state.hover = provinceId; changed = true;
+  }
+  if (countyState.hover !== countyId) {
+    if (countyState.hover !== null) map.removeFeatureState({ source: "counties", id: countyState.hover }, "hov");
+    if (countyId !== null) map.setFeatureState({ source: "counties", id: countyId }, { hov: true });
+    countyState.hover = countyId; changed = true;
+  }
+  const key = city ? `city:${city.properties.i}` : county ? `county:${countyId}` : province ? `province:${provinceId}` : null;
+  if (key) {
+    map.getCanvas().style.cursor = "pointer";
+    if (state.tipKey === key) moveTip(e);
+    else {
+      state.tipKey = key;
+      if (city) showCityTip(e, city.properties.i);
+      else if (county) countyTip(e, county);
+      else showTip(e, provinceId);
+    }
+  } else { state.tipKey = null; $("tip").hidden = true; map.getCanvas().style.cursor = ""; }
+  if (changed) redrawDraped();
+}
+
+function queueMapHover(e) {
+  if (map.isMoving()) return;
+  hoverEvent = e;
+  if (!hoverFrame) hoverFrame = requestAnimationFrame(() => {
+    hoverFrame = 0;
+    const event = hoverEvent; hoverEvent = null;
+    if (event && !map.isMoving()) paintMapHover(event);
+  });
+}
+
 function showTip(e, k) {
   const sd = sdNow(); const ai = state.admin.feature_admin[sd.feature[k]]; const tip = $("tip"); tip.replaceChildren();
   tip.append(el("b", null, adminName(ai)));
@@ -385,8 +487,7 @@ function showTip(e, k) {
   if (state.mode !== "control" || ctrl !== top) tip.append(el("div", null, `实际控制：${ctrl}`));
   if (sd.split[k]) tip.append(el("div", null, "边界穿过此省，此处为其中一块"));
   tip.append(el("span", "num", `人口约 ${fmt(sd.pop[k])}`));
-  tip.hidden = false; const r = map.getContainer().getBoundingClientRect();
-  tip.style.left = Math.min(e.point.x + 14, r.width - 270) + "px"; tip.style.top = (e.point.y + 14) + "px";
+  moveTip(e);
 }
 
 function panel() {
@@ -565,6 +666,7 @@ async function loadSnap(snap) {
   }
   if (ticket !== state.loading) return;  // another tab was clicked while this one loaded
   const prev = state.sel && state.data[state.snap] ? { admin: state.sel.admin, level: state.sel.level } : null;
+  clearMapHover();
   state.snap = snap; const sd = sdNow();
   countyReset();
   $("loading").hidden = true;
@@ -596,6 +698,7 @@ async function loadSnap(snap) {
 
 function setMode(mode) {
   countyState.selectionTicket++;
+  clearMapHover();
   const s = state.sel; state.mode = mode;
   for (const x of document.querySelectorAll("[data-mode]")) x.setAttribute("aria-pressed", String(x.dataset.mode === mode));
   state.sel = null; $("detail").hidden = true;
@@ -707,10 +810,12 @@ async function onLoad(index) {
   const empty = fc([]);
   map.addSource("relief", { type: "raster", tiles: ["relief://r/{z}/{x}/{y}"], tileSize: 256, minzoom: 0, maxzoom: 5 });
   map.addSource("shade", { type: "raster", tiles: ["relief://s/{z}/{x}/{y}"], tileSize: 256, minzoom: 0, maxzoom: 5 });
-  map.addSource("prov", { type: "geojson", data: empty, tolerance: 0.1 });  // 0.25 left overlap streaks on huge units at world zoom
-  map.addSource("admin", { type: "geojson", data: empty, tolerance: 0.25 });
-  map.addSource("units", { type: "geojson", data: empty, tolerance: 0.3 });
-  map.addSource("ctrl", { type: "geojson", data: empty, tolerance: 0.3 });
+  // These outlines are generalized to ~100 m. Reuse their tiles at street zoom
+  // instead of slicing the same world geometry for every closer zoom level.
+  map.addSource("prov", { type: "geojson", data: empty, tolerance: 0.1, maxzoom: 12 });
+  map.addSource("admin", { type: "geojson", data: empty, tolerance: 0.25, maxzoom: 12 });
+  map.addSource("units", { type: "geojson", data: empty, tolerance: 0.3, maxzoom: 12 });
+  map.addSource("ctrl", { type: "geojson", data: empty, tolerance: 0.3, maxzoom: 12 });
   map.addSource("hydro", { type: "geojson", data: empty });
   map.addSource("lbl-country", { type: "geojson", data: empty });
   map.addSource("lbl-prov", { type: "geojson", data: empty });
@@ -791,30 +896,14 @@ async function loadDetailHydro() {
 }
 
 function wire(admin) {
-  map.on("mousemove", "city", (e) => { const f = e.features[0]; if (!f) return; state.cityHover = true; showCityTip(e, f.properties.i); });
-  map.on("mouseleave", "city", () => { state.cityHover = false; $("tip").hidden = true; });
-  map.on("mousemove", "prov-fill", (e) => {
-    const f = e.features[0]; if (!f || state.cityHover) return; map.getCanvas().style.cursor = "pointer";
-    const county = countyHit(e);
-    if (county) {
-      if (state.hover !== null) { map.setFeatureState({ source: "prov", id: state.hover }, { hov: false }); state.hover = null; }
-      if (countyState.hover !== null && countyState.hover !== county.id) map.setFeatureState({ source: "counties", id: countyState.hover }, { hov: false });
-      countyState.hover = county.id; map.setFeatureState({ source: "counties", id: county.id }, { hov: true });
-      countyTip(e, county); redrawDraped(); return;
-    }
-    if (countyState.hover !== null) { map.setFeatureState({ source: "counties", id: countyState.hover }, { hov: false }); countyState.hover = null; }
-    if (state.hover !== null && state.hover !== f.id) map.setFeatureState({ source: "prov", id: state.hover }, { hov: false });
-    if (state.hover !== f.id) { state.hover = f.id; map.setFeatureState({ source: "prov", id: f.id }, { hov: true }); redrawDraped(); }
-    showTip(e, f.id);
-  });
-  map.on("mouseleave", "prov-fill", () => { map.getCanvas().style.cursor = ""; $("tip").hidden = true;
-    if (countyState.hover !== null) { map.setFeatureState({ source: "counties", id: countyState.hover }, { hov: false }); countyState.hover = null; }
-    if (state.hover !== null) { map.setFeatureState({ source: "prov", id: state.hover }, { hov: false }); redrawDraped(); } state.hover = null; });
+  map.on("mousemove", queueMapHover);
+  map.on("mouseout", clearMapHover);
+  map.on("movestart", clearMapHover);
   map.on("click", (e) => {
     const county = countyHit(e);
     if (county) { selectCounty(county); return; }
     const f = map.queryRenderedFeatures(e.point, { layers: ["prov-fill"] })[0];
-    if (f) onClick(f.id); else if (state.sel) clearSelection();
+    if (f?.properties.s === state.snap) onClick(f.id); else if (!f && state.sel) clearSelection();
   });
 
   for (const b of document.querySelectorAll("[data-mode]")) b.onclick = () => setMode(b.dataset.mode);

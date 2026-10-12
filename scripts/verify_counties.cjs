@@ -221,12 +221,12 @@ async function search(page, name, source) {
   });
   await retry.goto(base + "/2026.html", { waitUntil: "domcontentloaded" });
   await ready(retry, "2026");
-  await retry.evaluate(() => map.jumpTo({ center: [116.4, 39.9], zoom: 9 }));
+  await retry.evaluate(() => { map.jumpTo({ center: [116.4, 39.9], zoom: 9 }); });
   await retry.waitForFunction(() => !document.getElementById("countyRetry").hidden);
   assert(await retry.evaluate(() => map.getSource("prov")._data.features.length === 3523));
   await retry.click("#countyRetry");
   await retry.waitForFunction(() => document.getElementById("countyRetry").hidden && countyState.rendered.size > 0);
-  await retry.evaluate(() => map.jumpTo({ zoom: 3 }));
+  await retry.evaluate(() => { map.jumpTo({ zoom: 3 }); });
   await retry.waitForFunction(() => countyState.rendered.size === 0);
   await retryContext.close();
   assert.deepEqual(errors, []); assert.deepEqual(missing, []);

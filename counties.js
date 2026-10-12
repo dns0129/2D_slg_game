@@ -1,9 +1,12 @@
 // Fine divisions are static data, fetched only for visible provinces at close zoom.
 // The province parcel supplies the political unit, bloc and controller in each view.
 const countyState = { indexes: new Map(), chunks: new Map(), rendered: new Map(), ticket: 0,
-  selectionTicket: 0, hover: null, painted: new Map(), error: false };
+  selectionTicket: 0, hover: null, painted: new Map(), error: false,
+  regions: new Map(), coverageSnap: null, labelKey: null, paintMode: null,
+  sourceSnap: null, displaySnap: null };
 // Province navigation stops at zoom 4.5 or 5.5. Detail must already be visible there.
 const COUNTY_ZOOM = 4.5;
+const COUNTY_KEEP_ZOOM = 3.9;
 const countyEmpty = () => ({ type: "FeatureCollection", features: [] });
 const countyLevel = (p) => p.t === 1 ? "县级" : "地区级";
 const countyArea = (a) => a < 1 ? a.toFixed(3) + " km²" : km2(a);
@@ -42,6 +45,8 @@ function countyStatus(text, failed = false) {
 }
 
 function countyCoverage(index) {
+  if (countyState.coverageSnap === state.snap) return;
+  countyState.coverageSnap = state.snap;
   $("countyExplore").disabled = false;
   $("countyCoverage").textContent = `本年份已收录 ${index.units.toLocaleString()} 个县级 / 地区级单位；全球覆盖尚不完整。`;
   $("countyCoverageNames").textContent = index.countries.map((c) => `${c.name}（${c.count.toLocaleString()}）`).join("、") +
@@ -93,17 +98,23 @@ function countyProvinceControls(panel, province) {
 
 function countyClearRendered() {
   if (!map.getSource("counties")) return;
-  if (countyState.hover !== null) $("tip").hidden = true;
-  countyState.rendered.clear(); countyState.painted.clear(); countyState.hover = null;
+  if (!countyState.rendered.size) return;
+  clearMapHover();
+  countyState.rendered.clear(); countyState.regions.clear(); countyState.painted.clear(); countyState.hover = null;
+  countyState.sourceSnap = null; countyState.displaySnap = null;
   map.removeFeatureState({ source: "counties" });
   map.getSource("counties").setData(countyEmpty());
-  map.getSource("lbl-county").setData(countyEmpty());
+  for (const layer of ["county-fill", "county-line", "county-selected", "county-lbl", "county-selected-label"])
+    if (map.getLayoutProperty(layer, "visibility") !== "none") map.setLayoutProperty(layer, "visibility", "none");
+  redrawDraped();
 }
 
 function countyReset() {
   countyState.ticket++; countyState.selectionTicket++;
   countyClearRendered();
-  map.getSource("county-selected-label").setData(countyEmpty());
+  if (countyState.labelKey !== null) map.getSource("county-selected-label").setData(countyEmpty());
+  countyState.labelKey = null; countyState.coverageSnap = null;
+  countyState.sourceSnap = null; countyState.displaySnap = null;
   $("countyExplore").disabled = true;
   $("countyCoverage").textContent = "正在检查此年份的县级资料…";
   $("countyCoverageNames").textContent = "";
@@ -111,31 +122,53 @@ function countyReset() {
 
 function countyPaint() {
   if (!map.getLayer("county-fill")) return;
-  const on = $("tCounties").checked;
+  let changed = false;
+  const visibility = (id, value) => {
+    if (map.getLayoutProperty(id, "visibility") !== value) {
+      map.setLayoutProperty(id, "visibility", value); changed = true;
+    }
+  };
+  const on = $("tCounties").checked && countyState.displaySnap === state.snap;
   for (const layer of ["county-fill", "county-line", "county-selected"])
-    map.setLayoutProperty(layer, "visibility", on ? "visible" : "none");
-  map.setLayoutProperty("county-lbl", "visibility", on && $("tLabels").checked ? "visible" : "none");
-  map.setLayoutProperty("county-selected-label", "visibility", on && $("tLabels").checked ? "visible" : "none");
-  map.setPaintProperty("county-fill", "fill-color", fillColor());
+    visibility(layer, on ? "visible" : "none");
+  visibility("county-lbl", on && $("tLabels").checked ? "visible" : "none");
+  visibility("county-selected-label", on && $("tLabels").checked ? "visible" : "none");
+  if (countyState.paintMode !== state.mode) {
+    map.setPaintProperty("county-fill", "fill-color", fillColor());
+    countyState.paintMode = state.mode; changed = true;
+  }
   const s = state.sel;
+  const selectedIds = new Set();
   for (const [id, f] of countyState.rendered) {
-    const selected = !!(s?.level === "county" && s.county.properties.g === f.properties.g);
-    if (countyState.painted.get(id) !== selected) {
-      map.setFeatureState({ source: "counties", id }, { sel: selected });
-      countyState.painted.set(id, selected);
+    if (s?.level === "county" && s.county.properties.g === f.properties.g) {
+      selectedIds.add(id);
+      if (!countyState.painted.has(id)) {
+        map.setFeatureState({ source: "counties", id }, { sel: true }); changed = true;
+      }
     }
   }
+  for (const id of countyState.painted.keys()) if (!selectedIds.has(id)) {
+    map.removeFeatureState({ source: "counties", id }, "sel"); changed = true;
+  }
+  countyState.painted = new Map([...selectedIds].map((id) => [id, true]));
   const f = s?.level === "county" ? s.county : null;
-  map.getSource("county-selected-label").setData(f && countyLabel(f.properties.n) ? {
-    type: "FeatureCollection", features: [{ type: "Feature", geometry: { type: "Point", coordinates: f.properties.xy },
-      properties: { n: countyLabel(f.properties.n) } }]
-  } : countyEmpty());
-  redrawDraped();
+  const labelKey = f && countyLabel(f.properties.n) ? `${state.snap}:${f.id}` : null;
+  if (labelKey !== countyState.labelKey) {
+    countyState.labelKey = labelKey;
+    map.getSource("county-selected-label").setData(labelKey ? {
+      type: "FeatureCollection", features: [{ type: "Feature", geometry: { type: "Point", coordinates: f.properties.xy },
+        properties: { n: countyLabel(f.properties.n) } }]
+    } : countyEmpty());
+    changed = true;
+  }
+  if (changed) redrawDraped();
 }
 
 function countyViewportRegions(index) {
   const b = map.getBounds();
-  const west = b.getWest(), east = b.getEast(), south = b.getSouth(), north = b.getNorth();
+  // Retain a small margin so small pans and wheel steps reuse the same tile data.
+  const dx = (b.getEast() - b.getWest()) * .12, dy = (b.getNorth() - b.getSouth()) * .12;
+  const west = b.getWest() - dx, east = b.getEast() + dx, south = b.getSouth() - dy, north = b.getNorth() + dy;
   return index.regions.filter((r) => r.bbox[0] <= east && r.bbox[2] >= west && r.bbox[1] <= north && r.bbox[3] >= south);
 }
 
@@ -150,19 +183,23 @@ async function refreshCounties() {
       countyClearRendered(); countyStatus("县级 / 地区级图层已关闭"); return;
     }
     if (map.getZoom() < COUNTY_ZOOM) {
-      countyClearRendered();
+      // Layers hide at 4.5. Keep their data across small steps around that threshold.
+      if (map.getZoom() < COUNTY_KEEP_ZOOM) countyClearRendered();
       countyStatus(`放大到省级视图即可看见县块，也可点“查看县级地块示例” · 已收录 ${index.units.toLocaleString()} 个单位`); return;
     }
     const regions = countyViewportRegions(index);
     if (!regions.length) {
       countyClearRendered(); countyStatus("此区域暂无细分界线资料，继续显示省级地块"); return;
     }
+    if (!countyState.error && regions.every((r) => countyState.regions.has(r.file))) {
+      countyStatus("县界已载入 · 点击小区块查看详情和资料年份"); return;
+    }
     countyStatus("正在载入此区域的县级 / 地区级界线…");
     const batches = new Array(regions.length); let next = 0, failures = 0;
     await Promise.all(Array.from({ length: Math.min(4, regions.length) }, async () => {
       while (next < regions.length && ticket === countyState.ticket && snap === state.snap) {
         const i = next++;
-        try { batches[i] = await countyChunk(regions[i]); } catch { failures++; }
+        try { batches[i] = countyState.regions.get(regions[i].file) || await countyChunk(regions[i]); } catch { failures++; }
       }
     }));
     if (ticket !== countyState.ticket || snap !== state.snap || !$("tCounties").checked) return;
@@ -172,15 +209,15 @@ async function refreshCounties() {
       return { ...f, properties: { ...f.properties, b: sd.bloc[k], c: sd.country[k], u: unitKey(sd, k),
         col: sd.countries[sd.country[k]][3], nc: sd.nations[sd.nation[k]][3] } };
     });
+    clearMapHover();
     countyState.rendered = new Map(features.map((f) => [f.id, f]));
-    countyState.painted.clear(); countyState.hover = null;
-    map.removeFeatureState({ source: "counties" });
-    map.getSource("counties").setData({ type: "FeatureCollection", features });
-    // Let the map handle collisions; never replace a real small polygon with a marker.
+    countyState.sourceSnap = snap;
+    countyState.regions = new Map(regions.flatMap((r, i) => batches[i] ? [[r.file, batches[i]]] : []));
+    // Labels share the geometry source, so a worker commits both at the same time.
     const labels = features.filter((f) => countyLabel(f.properties.n))
-      .map((f) => ({ type: "Feature", id: f.id, geometry: { type: "Point", coordinates: f.properties.xy },
+      .map((f) => ({ type: "Feature", id: 1e9 + f.id, geometry: { type: "Point", coordinates: f.properties.xy },
         properties: { n: countyLabel(f.properties.n), a: f.properties.area } }));
-    map.getSource("lbl-county").setData({ type: "FeatureCollection", features: labels });
+    map.getSource("counties").setData({ type: "FeatureCollection", features: [...features, ...labels] });
     countyPaint();
     countyStatus(failures ? "部分县界暂未载入，可重试；省级地图仍可使用" :
       "县界已载入 · 点击小区块查看详情和资料年份", failures > 0);
@@ -255,35 +292,43 @@ async function countySearch(q, rank) {
 }
 
 function countyHit(e) {
-  if (!$("tCounties").checked || map.getZoom() < COUNTY_ZOOM) return null;
+  if (!$("tCounties").checked || countyState.displaySnap !== state.snap || map.getZoom() < COUNTY_ZOOM) return null;
   const f = map.queryRenderedFeatures(e.point, { layers: ["county-fill"] })[0];
-  return f ? countyState.rendered.get(f.id) : null;
+  return countyRenderedHit(f);
+}
+
+function countyRenderedHit(hit) {
+  if (countyState.displaySnap !== state.snap) return null;
+  const f = hit && countyState.rendered.get(hit.id);
+  // Old worker tiles can remain visible while a new region or year is being committed.
+  return f && f.properties.g === hit.properties.g ? f : null;
 }
 
 function countyTip(e, f) {
   const p = f.properties, sd = sdNow(), k = p.k, tip = $("tip"); tip.replaceChildren();
   tip.append(el("b", null, p.n), el("div", null, `${countyLevel(p)} · ${adminName(p.p)}`),
     el("div", null, `实际控制：${country(sd, sd.country[k]).zh}`), el("span", "num", countyArea(p.area)));
-  tip.hidden = false;
-  const r = map.getContainer().getBoundingClientRect();
-  tip.style.left = Math.max(4, Math.min(e.point.x + 14, r.width - 270)) + "px";
-  tip.style.top = Math.max(4, Math.min(e.point.y + 14, r.height - tip.offsetHeight - 4)) + "px";
+  moveTip(e);
 }
 
 function setupCounties() {
-  for (const source of ["counties", "lbl-county", "county-selected-label"])
+  for (const source of ["counties", "county-selected-label"])
     map.addSource(source, { type: "geojson", data: countyEmpty(), tolerance: .03, maxzoom: 14 });
   map.addLayer({ id: "county-fill", type: "fill", source: "counties", minzoom: COUNTY_ZOOM,
+    filter: ["==", ["geometry-type"], "Polygon"],
     paint: { "fill-color": fillColor(), "fill-opacity": ["case", ["boolean", ["feature-state", "sel"], false], .48,
       ["boolean", ["feature-state", "hov"], false], .18, 0] } }, "prov-line");
   map.addLayer({ id: "county-line", type: "line", source: "counties", minzoom: COUNTY_ZOOM,
+    filter: ["==", ["geometry-type"], "Polygon"],
     paint: { "line-color": "#394d45", "line-width": ["interpolate", ["linear"], ["zoom"], 4.5, .65, 7, .85, 10, 1.15],
       "line-opacity": ["interpolate", ["linear"], ["zoom"], 4.5, .65, 7, .9] } }, "prov-line");
   map.addLayer({ id: "county-selected", type: "line", source: "counties", minzoom: COUNTY_ZOOM,
+    filter: ["==", ["geometry-type"], "Polygon"],
     paint: { "line-color": "#914926", "line-width": ["case", ["boolean", ["feature-state", "sel"], false], 2.7,
       ["boolean", ["feature-state", "hov"], false], 1.4, 0] } });
-  map.addLayer({ id: "county-lbl", type: "symbol", source: "lbl-county", minzoom: 5.5,
-    filter: ["step", ["zoom"], [">=", ["get", "a"], 500], 6.5, [">=", ["get", "a"], 100], 8, true],
+  map.addLayer({ id: "county-lbl", type: "symbol", source: "counties", minzoom: 5.5,
+    filter: ["all", ["==", ["geometry-type"], "Point"],
+      ["step", ["zoom"], [">=", ["get", "a"], 500], 6.5, [">=", ["get", "a"], 100], 8, true]],
     layout: { "text-field": ["get", "n"], "text-font": ["sans"], "text-size": 10.5,
       "text-max-width": 7, "text-padding": 4, "symbol-sort-key": ["-", 0, ["get", "a"]] },
     paint: { "text-color": "#495d50", "text-halo-color": HALO, "text-halo-width": 1.3 } });
@@ -291,6 +336,14 @@ function setupCounties() {
     layout: { "text-field": ["get", "n"], "text-font": ["sans"], "text-size": 12,
       "text-allow-overlap": true, "text-ignore-placement": true },
     paint: { "text-color": "#914926", "text-halo-color": HALO, "text-halo-width": 1.6 } });
+  map.on("sourcedata", () => {
+    // Cached county data can finish before the new province/control outlines.
+    // Reveal a new year only after the political map and its labels are ready too.
+    if (countyState.sourceSnap === state.snap && countyState.displaySnap !== state.snap && countyState.rendered.size &&
+        ["counties", "prov", "admin", "units", "ctrl", "cities", "lbl-country", "lbl-prov"].every((id) => map.isSourceLoaded(id))) {
+      countyState.displaySnap = state.snap; countyPaint();
+    }
+  });
   map.on("moveend", refreshCounties);
   $("tCounties").onchange = () => {
     countyState.selectionTicket++;
